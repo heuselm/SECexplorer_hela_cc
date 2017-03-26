@@ -112,7 +112,7 @@ shinyServer(function(input, output) {
   output$table <- renderDataTable({
     target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue),
                                       unique(protein_id)]
-    trace_annotation_cum[protein_id %in% target_id]
+    up[Entry %in% target_id]
   })
   
 })
