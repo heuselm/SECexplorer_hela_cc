@@ -21,24 +21,22 @@ shinyUI(pageWithSidebar(
   sidebarPanel(
     width = 2,
     selectInput("fcolumn",
-                "Choose Annotation Column for filtering",
+                "Choose Identifier type for gene/protein selection",
                 annotations,
                 selected = "Gene_names"),
     
     uiOutput("fcolumnvalues"), #The possible choices of this field are calculated on the server side and passed over by uiOutput
-    p("Delete above entry and start typing for live search for your target protein"),
+    p("Delete above entries by backspace and start typing for live search for your target protein(s)"),
     
-    selectizeInput("replicate", label = "Select replicate for peptide level plot",
+    selectizeInput("replicate", label = "Select experimental replicate",
                    choices = c(1:3), selected = 1, multiple = FALSE),
-    
-    p("Select annotation column and value, and replicate to display matching SEC-SWATH chromatograms"),
     
     checkboxInput("split_plot", label = "Split plot by condition",
               value = TRUE),
     
     checkboxInput("logscale", "LOG10 Y-Axis", value = FALSE),
     
-    checkboxInput("show_monomers", "Indicate monomer expected fraction", value = TRUE),
+    checkboxInput("show_monomers", "Indicate monomer expected fractions", value = TRUE),
     
     p("Uniprot information for the current proteins is summarized in the lower table."),
     p("DISCLAIMER: THIS DATA IS UNPUBLISHED WORK - share only with permission of the creators."),
