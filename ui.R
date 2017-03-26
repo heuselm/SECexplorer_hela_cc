@@ -15,7 +15,7 @@ shinyUI(pageWithSidebar(
 
   
   # Application title
-  headerPanel("SEC-SWATH-Explorer Hela CCL2 cell-cycle arrest experiment Interphase vs. Mitosis - complex-centric"),
+  headerPanel("SEC-SWATH-Explorer Hela CCL2 cell-cycle arrest Interphase vs. Mitosis - complex-centric viewer"),
   
   # Sidebar with a slider input for number of observations
   sidebarPanel(
