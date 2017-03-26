@@ -83,13 +83,13 @@ shinyServer(function(input, output) {
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)") 
     
     if (input$split_plot){
-      p <- p + geom_line(aes(group = Gene_names, color = Gene_names), size = 2, alpha = 0.8) +
+      p <- p + geom_line(aes(group = Gene_names, color = Gene_names), size = 1, alpha = 0.8) +
         theme_bw() + 
         ggtitle(unique(target_id_traces$Gene_names)) +
         scale_x_continuous(breaks = lx.frc, labels = lx)  + 
         facet_wrap(~condition, ncol = 1)
     } else{
-      p <- p + geom_line(aes(color = Gene_names, linetype = condition), size = 2, alpha = 0.8) +
+      p <- p + geom_line(aes(color = Gene_names, linetype = condition), size = 1, alpha = 0.8) +
         theme_bw() + 
         ggtitle(unique(target_id_traces$Gene_names)) +
         scale_x_continuous(breaks = lx.frc, labels = lx) 
