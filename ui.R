@@ -49,7 +49,7 @@ shinyUI(pageWithSidebar(
   
   # Show a plot of the generated distribution
   mainPanel(
-    plotlyOutput("plot"),
+    plotlyOutput("plot", height = 800, width = 1600),
     dataTableOutput("table")
   )
 ))
