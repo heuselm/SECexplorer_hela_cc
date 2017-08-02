@@ -4,7 +4,7 @@ library(plotly)
 library(data.table)
 
 # data preparation
-load("data.rda")
+trace_annotation_cum<- readRDS("trace_annotation_cum.rda")
 
 annotations <- names(trace_annotation_cum)
 for (i in seq_along(annotations)){
