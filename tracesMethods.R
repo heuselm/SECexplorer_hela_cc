@@ -6,16 +6,28 @@
 #'        for subsetting \code{traces.obj}.
 #' @return traces.obj An object of type \code{traces.obj}.
 #' @export
-subset.traces <- function(traces.obj,trace_ids=NULL,fraction_ids=NULL){
-    if (!is.null(trace_ids)) {
-      traces.obj$traces <- subset(traces.obj$traces,id %in% trace_ids)
-      traces.obj$trace_annotation <- subset(traces.obj$trace_annotation ,id %in% trace_ids)
+subset.traces <- function(traces,trace_subset_ids=NULL,trace_subset_type="id",fraction_ids=NULL){
+  .tracesTest(traces)
+  if (!is.null(trace_subset_ids)) {
+    if (trace_subset_type %in% names(traces$trace_annotation)) {
+      traces$trace_annotation <- subset(traces$trace_annotation, get(trace_subset_type) %in% trace_subset_ids)
+      trace_ids <- traces$trace_annotation$id
+      traces$traces <- subset(traces$traces,id %in% trace_ids)
+      if (nrow(traces$traces) == 0) {
+        message("Caution! Subsetting returns empty traces object.")
+      }
+    } else {
+      stop(paste0(trace_subset_type, "is not a valid trace_subset_type."))
     }
-    if (!is.null(fraction_ids)){
-      traces.obj$traces <- traces.obj$traces[,c(fraction_ids,"id"),with=FALSE]
-      traces.obj$fraction_annotation <- subset(traces.obj$fraction_annotation ,id %in% fraction_ids)
+  }
+  if (!is.null(fraction_ids)){
+    traces$traces <- subset(traces$traces,select=c(names(traces$traces)[fraction_ids],"id"))
+    traces$fraction_annotation <- subset(traces$fraction_annotation ,id %in% fraction_ids)
+    if (nrow(traces$traces) == 0) {
+      stop(paste0("fraction_ids (",fraction_ids,") do not match the available fractions in the traces object."))
     }
-    traces.obj
+  }
+  traces
 }
 
 #' Get a matrix of intensity values from a traces object.
