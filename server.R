@@ -17,7 +17,6 @@ for (i in seq_along(annotations)){
 shinyServer(function(input, output) {
   
   ## Set the variables
-  
   apex <- reactiveValues(bound_left = NULL, bound_right = NULL)
   searchResFilt <- reactiveVal(NULL)
   ## Generate Reactive Filter Value Field for UI, depending on filter column chosen
