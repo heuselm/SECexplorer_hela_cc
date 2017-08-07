@@ -64,8 +64,18 @@ shinyUI(fluidPage(
         id = 'dataset',
         tabPanel('Welcome', 
                  p("Welcome to the Hela CCsec Viewer. Please wait a few seconds while the data is loading..."),
-                 h2("Usage Instructions"),
-                 img(src='HowtoViewer.png', align = "right"),
+                 h1("Usage Instructions"),
+                 p("This app has 2 main functionalities, acessible over the tabs above:"),
+                 tags$ol(
+                   tags$li("Viewer: In order to elucidate the interaction network complex context of proteins identified
+                           in SEC, chromatogram analysis in the context of co-complex 
+                           members is warranted. Therefore, SECexplorer-cc implements multi-protein selection and 
+                           across-condition visualization for expert inspection"),
+                   tags$li("The identified protein traces can be queried for local or global co-elution
+                           in order to find potential interaction parnters.")
+                 ),
+                 h2("Viewer"),
+                 img(src='HowtoViewer.png', align = "left", width = "100%"),
                  h3("1. Selection of ID type"),
                  tags$ul(
                    tags$li("Entry_name or Gene_Names are most informative and intuitive to search."),
@@ -98,7 +108,35 @@ shinyUI(fluidPage(
                  tags$ul(
                    tags$li("To help cross-referencing and establishing links which other proteins may be 
                             interesting to display in reference.")
-                 )
+                 ),
+                 h2("Search"),
+                 img(src='HowtoSearchInput.png', align = "left", width = "100%"),
+                 h3("1. Experimental condition"),
+                 tags$ul(tags$li("Choose the experimental condition where the search will be performed")),
+                 h3("2. Base Protein"),
+                 tags$ul(tags$li("Choose the protein Trace that will be searched")),
+                 h3("3. Search area"),
+                 tags$ul(
+                   tags$li("Define in which range co-eluting proteins should be searched for"),
+                   tags$li("If no selection is made all fractions will be used")
+                   ),
+                 h3("4. Perform the search"),
+                 p(),
+                 h2("Search Results"),
+                 img(src='HowtoSearchResult.png', align = "left", width = "100%"),
+                 h3("1. Correlation cutoff"),
+                 tags$ul(
+                   tags$li("Choose a cutoff for the local and global correlation of proteins to be displayed"),
+                   tags$li("Global correllation: The minimum correllation across all selected SEC fractions"),
+                   tags$li("Local correllation: The minimum correllation within the defined search area")
+                 ),
+                 h3("2. Result table"),
+                 tags$ul(tags$li("A table of all proteins meeting the search criteria")),
+                 h3("3. Reset"),
+                 tags$ul(tags$li("Return to the search input window"))
+                 
+                 
+                 
         ),
         tabPanel('Viewer',       
                  plotlyOutput("plot", height = 600),
