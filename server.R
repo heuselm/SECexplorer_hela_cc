@@ -4,8 +4,8 @@ library(plotly)
 library(data.table)
 # data preparation
 load("data_.rda")
-# source("searchSemiTargeted.R")
-# source("tracesMethods.R")
+source("searchSemiTargeted.R")
+source("tracesMethods.R")
 
 annotations <- names(trace_annotation_cum)
 for (i in seq_along(annotations)){
@@ -122,8 +122,8 @@ shinyServer(function(input, output) {
     }
     
     ggplotly(p)
-    dev.off()
-    p
+    # dev.off()
+    # p
   })
   
   ## Plots for semi-targeted search

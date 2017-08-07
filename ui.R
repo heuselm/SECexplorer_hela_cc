@@ -65,17 +65,18 @@ shinyUI(fluidPage(
         tabPanel('Welcome', 
                  p("Welcome to the Hela CCsec Viewer. Please wait a few seconds while the data is loading...")),
         tabPanel('Viewer',       
-                 plotlyOutput("plot"),
+                 plotlyOutput("plot", height = 600),
+                 p(),
                  dataTableOutput("table")
         ),
         tabPanel('Search',
                  uiOutput("plots"),
                  fluidRow(
-                   column(4, uiOutput("sliderglob")),
-                   column(4, uiOutput("sliderloc")),
-                   column(2, downloadButton('downloadData', 'Download'))
+                   column(3, uiOutput("sliderglob")),
+                   column(3, uiOutput("sliderloc"))
                  ),
-                 dataTableOutput("restable")
+                 dataTableOutput("restable"),
+                 p(class = 'text-center', downloadButton('downloadData', 'Download'))
          )
       )
     )
