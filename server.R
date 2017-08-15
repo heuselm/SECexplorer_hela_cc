@@ -129,7 +129,9 @@ shinyServer(function(input, output) {
   # Selection plot
   
   output$plot1 <- renderPlot({
-    p <- ggplot(target_id_traces()[replicate == input$replicate], aes(x=fraction, y=intensity)) +
+    repl <- as.numeric(gsub(".*_r","",input$trace))
+    cond <- ifelse(gsub("_r.*","",input$trace) == "mit", "Mitosis", "Interphase")
+    p <- ggplot(target_id_traces()[replicate == repl], aes(x=fraction, y=intensity)) +
       xlab("SEC fraction number(apparent MW[kDa])")+
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)") +
       geom_line(aes(color = Gene_names, linetype = condition), size = 1, alpha = 0.8) +
@@ -145,6 +147,11 @@ shinyServer(function(input, output) {
     if(input$show_monomers){
       p <- p + geom_point(aes(x = monomer_fraction, color = Gene_names, y = 0), shape = 23, fill = "white", size = 3) 
     }
+
+    p <- p + 
+      geom_line(data = target_id_traces()[replicate == repl & condition == cond & eval(as.name(input$fcolumn)) == input$baseProtein],
+                aes_string(x='fraction', y='intensity', color='Gene_names', linetype = 'condition'), lwd=2)
+    
     p
   })
   output$plots <- renderUI({
@@ -171,7 +178,7 @@ shinyServer(function(input, output) {
   observeEvent(input$search, {
     # Render a new Plot
     output$plots <- renderUI({
-      plotOutput("plot2")
+      plotlyOutput("plot2")
     })
     output$sliderloc <- renderUI({
       sliderInput("corr", "Correllation", 0, 1, value = 0.8, step = 0.01)
@@ -190,7 +197,7 @@ shinyServer(function(input, output) {
     searchResFilt(searchRes[cor >= 0.8 & global_cor >= 0])
 
     # Plot the search result
-    output$plot2 <- renderPlot({
+    output$plot2 <- renderPlotly({
       p <- plotSemiTargeted(search_result = searchResFilt(),
                             traces = traces,
                             Id = target_id,
@@ -208,7 +215,7 @@ shinyServer(function(input, output) {
         p <- p + geom_vline(xintercept=apex$bound_left,linetype="dashed")
         p <- p + geom_vline(xintercept=apex$bound_right,linetype="dashed")
       }
-      p
+      ggplotly(p)
     })
   })
   
