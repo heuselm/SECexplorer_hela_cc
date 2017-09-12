@@ -4,7 +4,7 @@ library(plotly)
 library(data.table)
 
 # data preparation
-trace_annotation_cum<- readRDS("trace_annotation_cum.rda")
+trace_annotation_cum<- readRDS("trace_annotation_cum_single.rda")
 
 annotations <- names(trace_annotation_cum)
 for (i in seq_along(annotations)){
@@ -31,8 +31,8 @@ shinyUI(fluidPage(
       
       conditionalPanel('input.dataset === "Viewer"',
                        
-                       selectizeInput("replicate", label = "Select experimental replicate",
-                                      choices = c(1:3), selected = 1, multiple = FALSE),
+                       # selectizeInput("replicate", label = "Select experimental replicate",
+                       #                choices = c(1:3), selected = 1, multiple = FALSE),
                        checkboxInput("split_plot", label = "Split plot by condition",
                                      value = TRUE),
                        
@@ -43,7 +43,7 @@ shinyUI(fluidPage(
       ),
       conditionalPanel('input.dataset === "Search"',
                        selectizeInput("trace", label = "Select experimental condition",
-                                      choices = paste0(c(rep("mit_r",3), rep("int_r", 3)),c(1,2,3)), selected = 1, multiple = FALSE),
+                                      choices = c("mit", "int"), selected = 1, multiple = FALSE),
                        uiOutput("baseProt"),
                        actionButton("search", label = "Perform Search"),
                        actionButton("reset", label = "Reset")

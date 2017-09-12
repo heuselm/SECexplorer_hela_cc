@@ -3,7 +3,7 @@ library(ggplot2)
 library(plotly)
 library(data.table)
 # data preparation
-load("data_.rda")
+load("data_single.rda")
 source("searchSemiTargeted.R")
 source("tracesMethods.R")
 
@@ -40,7 +40,7 @@ shinyServer(function(input, output) {
   ## generate selected protein SEC traces plot
   ######################################
   ######################################
-  lx.frc <- seq(5,(ncol(prot_int_r1$traces)-1),5)
+  lx.frc <- seq(5,(ncol(prot_int$traces)-1),5)
   lx <- paste(lx.frc , round(calibration_functions$SECfractionToMW(lx.frc), 1) , sep = '(' )
   lx <- paste(lx, "", sep = ')' )
   
@@ -52,37 +52,17 @@ shinyServer(function(input, output) {
     target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue),
                          unique(protein_id)]
     # interphase
-    target_id_traces_int_r1 <- toLongFormat(subset(prot_int_r1, trace_subset_ids = target_id)$traces)
-    target_id_traces_int_r1$replicate <- 1
-    target_id_traces_int_r1$condition <- "Interphase"
-    
-    target_id_traces_int_r2 <- toLongFormat(subset(prot_int_r2, trace_subset_ids = target_id)$traces)
-    target_id_traces_int_r2$replicate <- 2
-    target_id_traces_int_r2$condition <- "Interphase"
-    
-    target_id_traces_int_r3 <- toLongFormat(subset(prot_int_r3, trace_subset_ids = target_id)$traces)
-    target_id_traces_int_r3$replicate <- 3
-    target_id_traces_int_r3$condition <- "Interphase"
+    target_id_traces_int <- toLongFormat(subset(prot_int, trace_subset_ids = target_id)$traces)
+    # target_id_traces_int_r1$replicate <- 1
+    target_id_traces_int$condition <- "Interphase"
     
     # mitosis
-    target_id_traces_mit_r1 <- toLongFormat(subset(prot_mit_r1, trace_subset_ids = target_id)$traces)
-    target_id_traces_mit_r1$replicate <- 1
-    target_id_traces_mit_r1$condition <- "Mitosis"
+    target_id_traces_mit <- toLongFormat(subset(prot_mit, trace_subset_ids = target_id)$traces)
+    # target_id_traces_mit_r1$replicate <- 1
+    target_id_traces_mit$condition <- "Mitosis"
     
-    target_id_traces_mit_r2 <- toLongFormat(subset(prot_mit_r2, trace_subset_ids = target_id)$traces)
-    target_id_traces_mit_r2$replicate <- 2
-    target_id_traces_mit_r2$condition <- "Mitosis"
-    
-    target_id_traces_mit_r3 <- toLongFormat(subset(prot_mit_r3, trace_subset_ids = target_id)$traces)
-    target_id_traces_mit_r3$replicate <- 3
-    target_id_traces_mit_r3$condition <- "Mitosis"
-    
-    target_id_traces <- rbind(target_id_traces_int_r1,
-                              target_id_traces_int_r2,
-                              target_id_traces_int_r3,
-                              target_id_traces_mit_r1,
-                              target_id_traces_mit_r2,
-                              target_id_traces_mit_r3)
+    target_id_traces <- rbind(target_id_traces_int,
+                              target_id_traces_mit)
     
     target_id_traces <- merge(target_id_traces, trace_annotation_cum,
                               by.x = "id", by.y = "protein_id", all.y = FALSE, all.x = TRUE)
@@ -95,7 +75,7 @@ shinyServer(function(input, output) {
   output$plot <- renderPlotly({
     
     # PLOT
-    p <- ggplot(target_id_traces()[replicate == input$replicate], aes(x=fraction, y=intensity)) +
+    p <- ggplot(target_id_traces(), aes(x=fraction, y=intensity)) +
       xlab("SEC fraction number(apparent MW[kDa])") +
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)") 
     
@@ -129,9 +109,9 @@ shinyServer(function(input, output) {
   # Selection plot
   
   output$plot1 <- renderPlot({
-    repl <- as.numeric(gsub(".*_r","",input$trace))
-    cond <- ifelse(gsub("_r.*","",input$trace) == "mit", "Mitosis", "Interphase")
-    p <- ggplot(target_id_traces()[replicate == repl], aes(x=fraction, y=intensity)) +
+    
+    cond <- ifelse(input$trace == "mit", "Mitosis", "Interphase")
+    p <- ggplot(target_id_traces(), aes(x=fraction, y=intensity)) +
       xlab("SEC fraction number(apparent MW[kDa])")+
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)") +
       geom_line(aes(color = Gene_names, linetype = condition), size = 1, alpha = 0.8) +
@@ -149,7 +129,7 @@ shinyServer(function(input, output) {
     }
 
     p <- p + 
-      geom_line(data = target_id_traces()[replicate == repl & condition == cond & eval(as.name(input$fcolumn)) == input$baseProtein],
+      geom_line(data = target_id_traces()[condition == cond & eval(as.name(input$fcolumn)) == input$baseProtein],
                 aes_string(x='fraction', y='intensity', color='Gene_names', linetype = 'condition'), lwd=2)
     
     p
