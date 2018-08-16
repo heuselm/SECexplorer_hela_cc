@@ -2,10 +2,18 @@ library(shiny)
 library(ggplot2)
 library(plotly)
 library(data.table)
+library(STRINGdb)
+canCrop <- require(magick) # This package is not available on windows (used to crop images)
+
+
 # data preparation
 load("data_.rda")
-# source("searchSemiTargeted.R")
-# source("tracesMethods.R")
+stringLinks <- fread("9606.protein.links.v10.5.HeLaSubset.txt")
+stringIdMap <- readRDS("stringIdMapUniq.rda")
+source("searchSemiTargeted.R")
+source("tracesMethods.R")
+source("stringMethods.R")
+# string_db <- STRINGdb$new( version="10", species=9606, score_threshold=400, input_directory="" )
 
 annotations <- names(trace_annotation_cum)
 for (i in seq_along(annotations)){
@@ -14,7 +22,7 @@ for (i in seq_along(annotations)){
 
 # server definition
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
   ## Set the variables
   
@@ -30,6 +38,15 @@ shinyServer(function(input, output) {
   
   output$baseProt <- renderUI({
     selectInput("baseProtein", "Base Protein", input$fvalue)
+  })
+  output$stringProt <- renderUI({
+    selectInput("stringProtein", "Search Protein", input$fvalue)
+  })
+  output$nrinteractors <- renderUI({
+    sliderInput("nrint", "Nr interactors", 0, 100, value = 10, step = 1)
+  })
+  output$confidencethr <- renderUI({
+    sliderInput("conf", "Confidence threshold", 0, 1000, value = 400, step = 5)
   })
   
   observeEvent(input$plot1_brush, {
@@ -211,18 +228,93 @@ shinyServer(function(input, output) {
       }
       p
     })
+    
+    # Plot the String interaction networks
+    # output$plot_st_string <- renderPlot({
+    #   # string_ids <- string_db$map(searchResFilt(), my_data_frame_id_col_names = "id")
+    #   string_ids <- up[Entry %in% searchResFilt()$id]$`Cross-reference_(STRING)`
+    #   string_ids <- string_ids[string_ids != ""]
+    #   print(string_ids)
+    #   p <- string_db$plot_network(string_ids, add_link = T, add_summary = T)
+    #   p
+    # })
   })
   
+  # Plot the String interaction of selected Protein
+  output$plot_string_neighbors <- renderImage({
+    target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] == input$stringProtein),
+                                      unique(protein_id)]
+    print(target_id)
+    target_string <- up[Entry == target_id]$`Cross-reference_(STRING)`
+    target_string <- strsplit(target_string, split = ";")[[1]]
+    print(target_string)
+    # target_neighbors <- string_db$get_neighbors(target_string)
+    # print(target_neighbors)
+    # p <- string_db$plot_network(c(target_string, target_neighbors), add_link = F, add_summary = F)
+    # p
+    # width  <- session$clientData$output_plot_width
+    # height <- session$clientData$output_plot_height
+    # mysvgwidth <- width/96
+    # mysvgheight <- height/96
+    
+    outfile <- tempfile(fileext = '.svg')
+    print(outfile)
+    obtainNeighborImage(target_string, required_score = input$conf, add_white_nodes = input$nrint, type = "svg", 
+                        network_flavor = "evidence", filename = outfile, verbose = T)
+    # if(canCrop){
+    #   tmpImg <-image_read_svg(outfile)
+    #   width <- image_info(tmpImg)$width
+    #   height <- image_info(tmpImg)$height
+    #   tmpImgC <- image_crop(tmpImg, geometry_area(height*1.25, height, (width-height*1.25)/2,0))
+    #   outfileC <- tempfile(fileext = '.png')
+    #   image_write(tmpImgC, path=outfileC, format = "png" )
+    #   print(outfileC)
+    #   # Return a list containing the filename
+    #   list(src = outfileC,
+    #        contentType = 'image/png',
+    #        # width="100%",
+    #        height="100%",
+    #        alt = "Cannot display string network")
+    #   
+    # }else{
+    #   
+    # }
+    # Return a list containing the filename
+    list(src = outfile,
+         contentType = 'image/svg+xml',
+         # width="100%",
+         height="100%",
+         alt = "Cannot display string network")
+  }, deleteFile = F)
+
+  # Watch the pasteInteractors button
+  observeEvent(input$paste, {
+      if(!is.null(input$corr)){
+        searchResFilt(searchRes[cor >= input$corr])
+      }
+      if(!is.null(input$globalCorr)){
+        searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
+      }
+    # ids <- unique(c(restable$Protein1, restable$Protein2))
+    ids <- unique(c(input$fcolumn, strids))
+    print(ids)
+
+    updateSelectizeInput(session, "fvalue", selected = ids)
+
+    
+    })
+  
+  # Watch the slider input
   observeEvent({
     input$corr
     input$globalCorr}, {
-    if(!is.null(input$corr)){
-      searchResFilt(searchRes[cor >= input$corr])
-    }
-    if(!is.null(input$globalCorr)){
-      searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
-    }
-   })
+      if(!is.null(input$corr)){
+        searchResFilt(searchRes[cor >= input$corr])
+      }
+      if(!is.null(input$globalCorr)){
+        searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
+      }
+    })
   # Table output
   output$table <- renderDataTable({
     target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue),
@@ -232,6 +324,22 @@ shinyServer(function(input, output) {
   output$restable <- renderDataTable({
     searchResFilt()
   })
+  # String table output
+  output$stringtable <- renderDataTable({
+    target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] == input$stringProtein),
+                                      unique(protein_id)]
+    target_string <- up[Entry == target_id]$`Cross-reference_(STRING)`
+    target_string <- strsplit(target_string, split = ";")[[1]]
+    
+    restable <- stringLinks[protein1 == target_string | protein2 == target_string]
+    restable$Protein1 <- stringIdMap[restable$protein1]
+    restable$Protein2 <- stringIdMap[restable$protein2]
+    restable <- restable[order(combined_score, Protein1, Protein2, decreasing = T),.(Protein1, Protein2, combined_score)]
+    strids <<- unique(restable$Protein1)[1:input$nrint] #Make the ids available globally
+    restable
+  })
+  
+
   # Download content
   output$downloadData <- downloadHandler(
     filename = function(){ paste0("Tageted_search_result_", input$baseProtein,".csv")},

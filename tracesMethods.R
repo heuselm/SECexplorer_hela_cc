@@ -96,3 +96,28 @@ summary.traces <- function(traces.obj) {
   res
 }
 
+#' Test if an object is of class traces.
+#' @param traces Object of class traces.
+#' @param type Character string specifying whether a specific type of traces is required.
+#' The two options are "peptide" or "protein". Default is \code{NULL},
+#' meaning that no specific type is required.
+.tracesTest <- function(traces,type=NULL){
+  if (! class(traces)=="traces") {
+    stop("Object is not of class traces.")
+  }
+  if (! all(names(traces)==c("traces","trace_type","trace_annotation","fraction_annotation"))) {
+    stop("Traces object doesn't contain all necessary items: traces, trace_type, trace_annotation, and fraction_annotation.")
+  }
+  if (!is.null(type)) {
+    if (type != traces$trace_type) {
+      stop("Traces object is of wrong type. Please check your input traces.")
+    }
+  }
+  if (! identical(traces$traces$id,traces$trace_annotation$id)) {
+    stop("IDs in traces and trace_annotation are not identical.")
+  }
+  if (! identical(names(traces$traces),c(traces$fraction_annotation$id,"id"))) {
+    stop("Fractions in traces and fraction_annotation are not identical.")
+  }
+}
+

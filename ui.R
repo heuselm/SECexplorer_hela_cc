@@ -39,7 +39,7 @@ shinyUI(fluidPage(
                        checkboxInput("logscale", "LOG10 Y-Axis", value = FALSE),
                        
                        checkboxInput("show_monomers", "Indicate monomer expected fractions", value = TRUE)
-
+                       
       ),
       conditionalPanel('input.dataset === "Search"',
                        selectizeInput("trace", label = "Select experimental condition",
@@ -47,7 +47,15 @@ shinyUI(fluidPage(
                        uiOutput("baseProt"),
                        actionButton("search", label = "Perform Search"),
                        actionButton("reset", label = "Reset")
-                       
+                       # plotOutput("plot_st_string")
+      ),
+      conditionalPanel('input.dataset === "String"',
+                       uiOutput("stringProt"),
+                       uiOutput("nrinteractors"),
+                       uiOutput("confidencethr"),
+                       actionButton("refresh", label = "Refresh"),
+                       actionButton("paste", label = "Paste Interactors")
+                       # plotOutput("plot_st_string")
       ),
       conditionalPanel('input.dataset == "Welcome"',
                        helpText("Select a tab to start")
@@ -63,7 +71,8 @@ shinyUI(fluidPage(
       tabsetPanel(
         id = 'dataset',
         tabPanel('Welcome', 
-                 p("Welcome to the Hela CCsec Viewer. Please wait a few seconds while the data is loading...")),
+                 p("Welcome to the Hela CCsec Viewer. Please wait a few seconds while the data is loading...")
+        ),
         tabPanel('Viewer',       
                  plotlyOutput("plot"),
                  dataTableOutput("table")
@@ -76,7 +85,17 @@ shinyUI(fluidPage(
                    column(2, downloadButton('downloadData', 'Download'))
                  ),
                  dataTableOutput("restable")
-         )
+        ),
+        tabPanel('String',
+                 p("String interaction partners"),
+                 fluidRow(
+                   column(12, align="center",
+                          imageOutput("plot_string_neighbors")
+                   )
+                 ),
+                 dataTableOutput("stringtable")
+                 
+        )
       )
     )
   )
