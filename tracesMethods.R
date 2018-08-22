@@ -7,7 +7,6 @@
 #' @return traces.obj An object of type \code{traces.obj}.
 #' @export
 subset.traces <- function(traces,trace_subset_ids=NULL,trace_subset_type="id",fraction_ids=NULL){
-  .tracesTest(traces)
   if (!is.null(trace_subset_ids)) {
     if (trace_subset_type %in% names(traces$trace_annotation)) {
       traces$trace_annotation <- subset(traces$trace_annotation, get(trace_subset_type) %in% trace_subset_ids)
