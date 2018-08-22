@@ -157,6 +157,9 @@ shinyUI(fluidPage(
                  dataTableOutput("restable"),
                  p(class = 'text-center', downloadButton('downloadData', 'Download'))
         ),
+        tabPanel('DiffExpr',
+                 p("Volcano plot indicating differentially behaving Proteins acrosss the cell cycle")
+        ),
         tabPanel('String',
                  p("String interaction partners"),
                  fluidRow(
