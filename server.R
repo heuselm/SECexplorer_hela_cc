@@ -10,6 +10,7 @@ canCrop <- require(magick) # This package is not available on windows (used to c
 load("data_.rda")
 stringLinks <- fread("9606.protein.links.v10.5.HeLaSubset.txt")
 stringIdMap <- readRDS("stringIdMapUniq.rda")
+diffExprProt <- readRDS("differentiallyExpressedProteins.rda")
 source("searchSemiTargeted.R")
 source("tracesMethods.R")
 source("stringMethods.R")
@@ -246,6 +247,25 @@ shinyServer(function(input, output, session) {
     # })
   })
   
+  # Plot the differentially expressed proteins between conditions
+  
+  output$plot_diffexpr <- renderPlotly({
+    p <- ggplot(diffExprProt, aes(x = medianLog2FC, y = -log10(pBHadj))) +
+      geom_point(aes(group=feature_id)) +
+      # geom_point(aes(color = (feature_id %in% "P49792"))) +
+      geom_hline(yintercept = -log10(0.05)) +
+      geom_vline(xintercept = c(1, -1)) +
+      theme_bw()
+    
+    ggplotly(p) %>% layout(dragmode = "select")
+  })
+  
+  output$hover <- renderPrint({
+    d <- event_data("plotly_hover")
+    if (is.null(d)) "Hover events appear here (unhover to clear)" else d
+  })
+  
+
   # Plot the String interaction of selected Protein
   output$plot_string_neighbors <- renderImage({
     target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] == input$stringProtein),
