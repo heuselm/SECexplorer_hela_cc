@@ -10,7 +10,11 @@ canCrop <- require(magick) # This package is not available on windows (used to c
 load("data_.rda")
 stringLinks <- fread("9606.protein.links.v10.5.HeLaSubset.txt")
 stringIdMap <- readRDS("stringIdMapUniq.rda")
-diffExprProt <- readRDS("differentiallyExpressedProteins.rda")
+#Load the differential expression data
+# diffExprProt <- readRDS("differentiallyExpressedProteins.rda")
+# diffExprProt <- merge(diffExprProt, trace_annotation_cum, by.x = "feature_id", by.y = "protein_id")
+# saveRDS(diffExprProt, "differentiallyExpressedProteinsAnn.rda")
+diffExprProt <- readRDS("differentiallyExpressedProteinsAnn.rda")
 source("searchSemiTargeted.R")
 source("tracesMethods.R")
 source("stringMethods.R")
