@@ -254,22 +254,37 @@ shinyServer(function(input, output, session) {
   # Plot the differentially expressed proteins between conditions
   
   output$plot_diffexpr <- renderPlotly({
+    setkeyv(diffExprProt, input$fcolumn)
+    # print(trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue)]$protein_id)
+    highlight_proteins <- diffExprProt[feature_id %in% trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue)]$protein_id]
     p <- ggplot(diffExprProt, aes(x = medianLog2FC, y = -log10(pBHadj))) +
       geom_point(aes(group=feature_id)) +
       # geom_point(aes(color = (feature_id %in% "P49792"))) +
       geom_hline(yintercept = -log10(0.05)) +
       geom_vline(xintercept = c(1, -1)) +
+      geom_point(data = highlight_proteins, aes(group=feature_id), color="red") +
       theme_bw()
     
-    ggplotly(p) %>% layout(dragmode = "select")
+    ggplotly(p, source = "plot_diffexpr") %>% layout(dragmode = "select")
   })
   
-  output$hover <- renderPrint({
-    d <- event_data("plotly_hover")
-    if (is.null(d)) "Hover events appear here (unhover to clear)" else d
+  # output$diffexprsel <- renderPrint({
+  #   d <- event_data("plotly_selected", source = "plot_diffexpr")
+  #   print(d$key)
+  #   # d <- paste0(unique(trace_annotation_cum[protein_id %in% d][[input$fcolumn]]))
+  #   if (is.null(d)) "Select events appear here (unhover to clear)" else d
+  # })
+  
+  # Watch the pasteSelection button
+  observeEvent(input$pastediff, {
+    sel <- event_data("plotly_selected", source = "plot_diffexpr")
+    print(sel)
+    ids <- unique(diffExprProt[sel[sel$curveNumber == 0,]$pointNumber + 1][[input$fcolumn]])
+    print(ids)
+    updateSelectizeInput(session, "fvalue", selected = ids)
   })
   
-
+  
   # Plot the String interaction of selected Protein
   output$plot_string_neighbors <- renderImage({
     target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] == input$stringProtein),
@@ -330,8 +345,6 @@ shinyServer(function(input, output, session) {
     print(ids)
 
     updateSelectizeInput(session, "fvalue", selected = ids)
-
-    
     })
   
   # Watch the slider input
@@ -354,6 +367,7 @@ shinyServer(function(input, output, session) {
   output$restable <- renderDataTable({
     searchResFilt()
   })
+  
   # String table output
   output$stringtable <- renderDataTable({
     target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] == input$stringProtein),

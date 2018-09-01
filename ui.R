@@ -49,6 +49,11 @@ shinyUI(fluidPage(
                        actionButton("reset", label = "Reset")
                        # plotOutput("plot_st_string")
       ),
+      conditionalPanel('input.dataset === "DiffExpr"',
+                       p("To select Proteins of interest drag a selection box and press 'Paste Selection'"),
+                       actionButton("pastediff", label = "Paste Selection")
+                       # plotOutput("plot_st_string")
+      ),
       conditionalPanel('input.dataset === "String"',
                        uiOutput("stringProt"),
                        uiOutput("nrinteractors"),
@@ -159,8 +164,9 @@ shinyUI(fluidPage(
         ),
         tabPanel('DiffExpr',
                  p("Volcano plot indicating differentially behaving Proteins acrosss the cell cycle"),
-                 plotlyOutput("plot_diffexpr", height = 600), 
-                 verbatimTextOutput("hover")
+                 plotlyOutput("plot_diffexpr", height = 600)
+                 # verbatimTextOutput("hover"),
+                 # verbatimTextOutput("diffexprsel")
         ),
         tabPanel('String',
                  p("String interaction partners"),
