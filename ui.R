@@ -21,9 +21,9 @@ shinyUI(fluidPage(
   sidebarLayout(  
     sidebarPanel(
       width = 3,
-      selectInput("fcolumn",
-                  "Choose Identifier type for gene/protein selection",
-                  annotations,
+      selectInput(inputId = "fcolumn",
+                  label = "Choose Identifier type for gene/protein selection",
+                  choices = annotations,
                   selected = "Gene_names"),
       
       uiOutput("fcolumnvalues"), #The possible choices of this field are calculated on the server side and passed over by uiOutput
@@ -31,15 +31,14 @@ shinyUI(fluidPage(
       
       conditionalPanel('input.dataset === "Viewer"',
                        
-                       selectizeInput("replicate", label = "Select experimental replicate",
-                                      choices = c(1:3), selected = 1, multiple = FALSE),
+                       ## selectizeInput("replicate", label = "Select experimental replicate",
+                       ##                choices = c(1:3), selected = 1, multiple = FALSE),
                        checkboxInput("split_plot", label = "Split plot by condition",
                                      value = TRUE),
-                       
                        checkboxInput("logscale", "LOG10 Y-Axis", value = FALSE),
-                       
-                       checkboxInput("show_monomers", "Indicate monomer expected fractions", value = TRUE)
-                       
+                       checkboxInput("show_monomers", "Indicate monomer expected fractions", value = TRUE),
+                       checkboxInput("error_bars", "Plot error bars", value = TRUE),
+                       uiOutput("errortype")
       ),
       conditionalPanel('input.dataset === "Search"',
                        selectizeInput("trace", label = "Select experimental condition",
@@ -71,7 +70,7 @@ shinyUI(fluidPage(
       
     ),
     
-    # Show a plot of the generated distribution
+    # The panel for the plot output
     mainPanel(
       tabsetPanel(
         id = 'dataset',

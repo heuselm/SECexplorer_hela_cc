@@ -37,7 +37,18 @@ shinyServer(function(input, output, session) {
     values <- sort(unique(get(input$fcolumn)))
     # values <- values[nchar(values)>0]
     selectizeInput("fvalue", "Search and select proteins of interest", values,
-                   multiple = TRUE, options = list(maxOptions = 6000), selected = c("NUP54", "NUP62", "NUP58 KIAA0410 NUPL1"))
+                   multiple = TRUE, options = list(maxOptions = 6000),
+                   selected = c("NUP54", "NUP62", "NUP58 KIAA0410 NUPL1"))
+  })
+  output$errortype <- renderUI({
+    if(input$error_bars){
+      selectizeInput("ertype",
+                     label=NULL,
+                     choices=c("Standard Error (SEM)", "Standard deviation (SD)"),
+                     selected=2)
+    }else{
+      NULL
+    }
   })
   
   output$baseProt <- renderUI({
@@ -73,41 +84,42 @@ shinyServer(function(input, output, session) {
     
     target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue),
                          unique(protein_id)]
-    # interphase
-    target_id_traces_int_r1 <- toLongFormat(subset(prot_int_r1, trace_subset_ids = target_id)$traces)
-    target_id_traces_int_r1$replicate <- 1
-    target_id_traces_int_r1$condition <- "Interphase"
+    ## # interphase
+    ## target_id_traces_int_r1 <- toLongFormat(subset(prot_int_r1, trace_subset_ids = target_id)$traces)
+    ## target_id_traces_int_r1$replicate <- 1
+    ## target_id_traces_int_r1$condition <- "Interphase"
     
-    target_id_traces_int_r2 <- toLongFormat(subset(prot_int_r2, trace_subset_ids = target_id)$traces)
-    target_id_traces_int_r2$replicate <- 2
-    target_id_traces_int_r2$condition <- "Interphase"
+    ## target_id_traces_int_r2 <- toLongFormat(subset(prot_int_r2, trace_subset_ids = target_id)$traces)
+    ## target_id_traces_int_r2$replicate <- 2
+    ## target_id_traces_int_r2$condition <- "Interphase"
     
-    target_id_traces_int_r3 <- toLongFormat(subset(prot_int_r3, trace_subset_ids = target_id)$traces)
-    target_id_traces_int_r3$replicate <- 3
-    target_id_traces_int_r3$condition <- "Interphase"
+    ## target_id_traces_int_r3 <- toLongFormat(subset(prot_int_r3, trace_subset_ids = target_id)$traces)
+    ## target_id_traces_int_r3$replicate <- 3
+    ## target_id_traces_int_r3$condition <- "Interphase"
     
-    # mitosis
-    target_id_traces_mit_r1 <- toLongFormat(subset(prot_mit_r1, trace_subset_ids = target_id)$traces)
-    target_id_traces_mit_r1$replicate <- 1
-    target_id_traces_mit_r1$condition <- "Mitosis"
+    ## # mitosis
+    ## target_id_traces_mit_r1 <- toLongFormat(subset(prot_mit_r1, trace_subset_ids = target_id)$traces)
+    ## target_id_traces_mit_r1$replicate <- 1
+    ## target_id_traces_mit_r1$condition <- "Mitosis"
     
-    target_id_traces_mit_r2 <- toLongFormat(subset(prot_mit_r2, trace_subset_ids = target_id)$traces)
-    target_id_traces_mit_r2$replicate <- 2
-    target_id_traces_mit_r2$condition <- "Mitosis"
+    ## target_id_traces_mit_r2 <- toLongFormat(subset(prot_mit_r2, trace_subset_ids = target_id)$traces)
+    ## target_id_traces_mit_r2$replicate <- 2
+    ## target_id_traces_mit_r2$condition <- "Mitosis"
     
-    target_id_traces_mit_r3 <- toLongFormat(subset(prot_mit_r3, trace_subset_ids = target_id)$traces)
-    target_id_traces_mit_r3$replicate <- 3
-    target_id_traces_mit_r3$condition <- "Mitosis"
+    ## target_id_traces_mit_r3 <- toLongFormat(subset(prot_mit_r3, trace_subset_ids = target_id)$traces)
+    ## target_id_traces_mit_r3$replicate <- 3
+    ## target_id_traces_mit_r3$condition <- "Mitosis"
     
-    target_id_traces <- rbind(target_id_traces_int_r1,
-                              target_id_traces_int_r2,
-                              target_id_traces_int_r3,
-                              target_id_traces_mit_r1,
-                              target_id_traces_mit_r2,
-                              target_id_traces_mit_r3)
+    ## target_id_traces <- rbind(target_id_traces_int_r1,
+    ##                           target_id_traces_int_r2,
+    ##                           target_id_traces_int_r3,
+    ##                           target_id_traces_mit_r1,
+    ##                           target_id_traces_mit_r2,
+    ##                           target_id_traces_mit_r3)
     
-    target_id_traces <- merge(target_id_traces, trace_annotation_cum,
-                              by.x = "id", by.y = "protein_id", all.y = FALSE, all.x = TRUE)
+    ## target_id_traces <- merge(target_id_traces, trace_annotation_cum,
+    ##                           by.x = "id", by.y = "protein_id", all.y = FALSE, all.x = TRUE)
+    target_id_traces <- tr[id %in% target_id]
     
     target_id_traces[, monomer_fraction:=calibration_functions$MWtoSECfraction(protein_mw)]
     target_id_traces
@@ -117,23 +129,38 @@ shinyServer(function(input, output, session) {
   output$plot <- renderPlotly({
     
     # PLOT
-    p <- ggplot(target_id_traces()[replicate == input$replicate], aes(x=fraction, y=intensity)) +
+    p <- ggplot(target_id_traces(), aes(x=fraction, y=intensity_mean + 1)) +
       xlab("SEC fraction number(apparent MW[kDa])") +
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)") 
     
     if (input$split_plot){
       p <- p + geom_line(aes(group = Gene_names, color = Gene_names), size = 1, alpha = 0.8) +
         theme_bw() + 
-        ggtitle(unique(target_id_traces()$Gene_names)) +
+        ## ggtitle(unique(target_id_traces()$Gene_names)) +
         scale_x_continuous(breaks = lx.frc, labels = lx)  + 
         facet_wrap(~condition, ncol = 1)
     } else{
       p <- p + geom_line(aes(color = Gene_names, linetype = condition), size = 1, alpha = 0.8) +
         theme_bw() + 
-        ggtitle(unique(target_id_traces()$Gene_names)) +
+        ## ggtitle(unique(target_id_traces()$Gene_names)) +
         scale_x_continuous(breaks = lx.frc, labels = lx) 
     }
-      
+    if(input$error_bars){
+      if(input$ertype == "Standard deviation (SD)"){
+        p <- p + geom_point(aes(color = Gene_names)) +
+          geom_errorbar(aes(ymin=intensity_mean-intensity_sd,
+                            ymax = intensity_mean+intensity_sd,
+                            color = Gene_names),
+                        position = position_dodge(0.2))
+      }
+      if(input$ertype == "Standard Error (SEM)"){
+        p <- p + geom_point(aes(color = Gene_names)) +
+          geom_errorbar(aes(ymin=intensity_mean-intensity_se,
+                            ymax = intensity_mean+intensity_se,
+                            color = Gene_names),
+                        position = position_dodge(0.2))
+      }
+    }
     if(input$show_monomers){
       p <- p + geom_point(aes(x = monomer_fraction, color = Gene_names, y = 0), shape = 23, fill = "white", size = 3) 
     }
@@ -152,7 +179,7 @@ shinyServer(function(input, output, session) {
   
   output$plot1 <- renderPlot({
     repl <- as.numeric(gsub(".*_r","",input$trace))
-    cond <- ifelse(gsub("_r.*","",input$trace) == "mit", "Mitosis", "Interphase")
+   cond <- ifelse(gsub("_r.*","",input$trace) == "mit", "Mitosis", "Interphase")
     p <- ggplot(target_id_traces()[replicate == repl], aes(x=fraction, y=intensity)) +
       xlab("SEC fraction number(apparent MW[kDa])")+
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)") +
@@ -304,7 +331,8 @@ shinyServer(function(input, output, session) {
     
     outfile <- tempfile(fileext = '.svg')
     print(outfile)
-    obtainNeighborImage(target_string, required_score = input$conf, add_white_nodes = input$nrint, type = "svg", 
+    obtainNeighborImage(target_string, required_score = input$conf,
+                        add_white_nodes = input$nrint, type = "svg",
                         network_flavor = "evidence", filename = outfile, verbose = T)
     # if(canCrop){
     #   tmpImg <-image_read_svg(outfile)
