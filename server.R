@@ -84,41 +84,6 @@ shinyServer(function(input, output, session) {
     
     target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue),
                          unique(protein_id)]
-    ## # interphase
-    ## target_id_traces_int_r1 <- toLongFormat(subset(prot_int_r1, trace_subset_ids = target_id)$traces)
-    ## target_id_traces_int_r1$replicate <- 1
-    ## target_id_traces_int_r1$condition <- "Interphase"
-    
-    ## target_id_traces_int_r2 <- toLongFormat(subset(prot_int_r2, trace_subset_ids = target_id)$traces)
-    ## target_id_traces_int_r2$replicate <- 2
-    ## target_id_traces_int_r2$condition <- "Interphase"
-    
-    ## target_id_traces_int_r3 <- toLongFormat(subset(prot_int_r3, trace_subset_ids = target_id)$traces)
-    ## target_id_traces_int_r3$replicate <- 3
-    ## target_id_traces_int_r3$condition <- "Interphase"
-    
-    ## # mitosis
-    ## target_id_traces_mit_r1 <- toLongFormat(subset(prot_mit_r1, trace_subset_ids = target_id)$traces)
-    ## target_id_traces_mit_r1$replicate <- 1
-    ## target_id_traces_mit_r1$condition <- "Mitosis"
-    
-    ## target_id_traces_mit_r2 <- toLongFormat(subset(prot_mit_r2, trace_subset_ids = target_id)$traces)
-    ## target_id_traces_mit_r2$replicate <- 2
-    ## target_id_traces_mit_r2$condition <- "Mitosis"
-    
-    ## target_id_traces_mit_r3 <- toLongFormat(subset(prot_mit_r3, trace_subset_ids = target_id)$traces)
-    ## target_id_traces_mit_r3$replicate <- 3
-    ## target_id_traces_mit_r3$condition <- "Mitosis"
-    
-    ## target_id_traces <- rbind(target_id_traces_int_r1,
-    ##                           target_id_traces_int_r2,
-    ##                           target_id_traces_int_r3,
-    ##                           target_id_traces_mit_r1,
-    ##                           target_id_traces_mit_r2,
-    ##                           target_id_traces_mit_r3)
-    
-    ## target_id_traces <- merge(target_id_traces, trace_annotation_cum,
-    ##                           by.x = "id", by.y = "protein_id", all.y = FALSE, all.x = TRUE)
     target_id_traces <- tr[id %in% target_id]
     
     target_id_traces[, monomer_fraction:=calibration_functions$MWtoSECfraction(protein_mw)]
