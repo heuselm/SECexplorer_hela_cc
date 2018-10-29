@@ -7,7 +7,10 @@ canCrop <- require(magick) # This package is not available on windows (used to c
 
 
 # data preparation
+pass <- readRDS("pass.rda")
 load("data_.rda")
+trall <- readRDS("proteinTracesLong_mean_sd_sem.rda")
+tr <- trall[id %in% c("P37198", "Q7Z3B4", "Q9BVL2")]
 stringLinks <- fread("9606.protein.links.v10.5.HeLaSubset.txt")
 stringIdMap <- readRDS("stringIdMapUniq.rda")
 #Load the differential expression data
@@ -266,6 +269,16 @@ shinyServer(function(input, output, session) {
   #   # d <- paste0(unique(trace_annotation_cum[protein_id %in% d][[input$fcolumn]]))
   #   if (is.null(d)) "Select events appear here (unhover to clear)" else d
   # })
+  output$pwdfeedback <- renderText("Limited access. Enter password")
+  observeEvent(input$enterpwd, {
+      if(input$pwd == pass){
+        tr <<- trall
+        output$pwdfeedback <- renderText("Password correct")
+      } else{
+        tr <<- trall[id %in% c("P37198", "Q7Z3B4", "Q9BVL2")]
+        output$pwdfeedback <- renderText("Password incorrect")
+      }
+  })
   
   # Watch the pasteSelection button
   observeEvent(input$pastediff, {
