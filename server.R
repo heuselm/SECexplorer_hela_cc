@@ -23,6 +23,7 @@ stringIdMap <- readRDS("stringIdMapUniq.rda")
 # saveRDS(diffExprProt, "differentiallyExpressedProteinsAnn.rda")
 diffExprProt <- readRDS("differentiallyExpressedProteinsAnn.rda")
 setwd("../../")
+default_proteins <- c("NUP54", "NUP62", "NUP58 KIAA0410 NUPL1")
 
 # Source the functions
 source("searchSemiTargeted.R")
@@ -30,10 +31,10 @@ source("tracesMethods.R")
 source("stringMethods.R")
 # string_db <- STRINGdb$new( version="10", species=9606, score_threshold=400, input_directory="" )
 
-annotations <- names(trace_annotation_cum)
-for (i in seq_along(annotations)){
-  assign(annotations[i], trace_annotation_cum[[i]])
-}
+idcols <- readRDS("www/data/idcols.rda")
+## for (i in seq_along(idcols)){
+##   assign(idcols[i], up[idcols][[i]])
+## }
 
 # server definition
 
@@ -42,13 +43,14 @@ shinyServer(function(input, output, session) {
   ## Set the variables
   apex <- reactiveValues(bound_left = NULL, bound_right = NULL)
   searchResFilt <- reactiveVal(NULL)
+
   ## Generate Reactive Filter Value Field for UI, depending on filter column chosen
   output$fcolumnvalues <- renderUI({
-    values <- sort(unique(get(input$fcolumn)))
+    values <- sort(unique(up[[input$fcolumn]]))
     # values <- values[nchar(values)>0]
     selectizeInput("fvalue", "Search and select proteins of interest", values,
                    multiple = TRUE, options = list(maxOptions = 6000),
-                   selected = c("NUP54", "NUP62", "NUP58 KIAA0410 NUPL1"))
+                   selected = default_proteins)
   })
   output$errortype <- renderUI({
     if(input$error_bars){
@@ -84,7 +86,7 @@ shinyServer(function(input, output, session) {
   ######################################
   ######################################
   lx.frc <- seq(5,(max(tr$fraction)-1),5)
-  lx <- paste(lx.frc , round(calibration_functions$SECfractionToMW(lx.frc), 1) , sep = '(' )
+  lx <- paste(lx.frc , round(calibration_functions$FractionToMW(lx.frc), 1) , sep = '(' )
   lx <- paste(lx, "", sep = ')' )
   
   # collect chromatograms for selection
@@ -92,11 +94,11 @@ shinyServer(function(input, output, session) {
     # apex$bound_right <- NULL
     # apex$bound_left <- NULL
     
-    target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue),
-                         unique(protein_id)]
+    target_id <- up[which(up[[input$fcolumn]] %in% input$fvalue),
+                         unique(Entry)]
     target_id_traces <- tr[id %in% target_id]
     
-    target_id_traces[, monomer_fraction:=calibration_functions$MWtoSECfraction(protein_mw)]
+    target_id_traces[, monomer_fraction:=calibration_functions$MWtoFraction(protein_mw)]
     target_id_traces
   })
   
@@ -211,8 +213,8 @@ shinyServer(function(input, output, session) {
       sliderInput("globalCorr", "Global Correllation", 0, 1, value = 0, step = 0.01)
     })
     # Perform the search
-    target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] == input$baseProtein),
-                                      unique(protein_id)]
+    target_id <- up[which(up[[input$fcolumn]] == input$baseProtein),
+                                      unique(Entry)]
     traces <- get(paste0("prot_", input$trace))
     searchRes <<- searchSemiTargeted(traces,
                        Id = target_id,
@@ -258,7 +260,7 @@ shinyServer(function(input, output, session) {
   output$plot_diffexpr <- renderPlotly({
     setkeyv(diffExprProt, input$fcolumn)
     # print(trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue)]$protein_id)
-    highlight_proteins <- diffExprProt[feature_id %in% trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue)]$protein_id]
+    highlight_proteins <- diffExprProt[feature_id %in% up[which(up[[input$fcolumn]] %in% input$fvalue)]$Entry]
     p <- ggplot(diffExprProt, aes(x = medianLog2FC, y = -log10(pBHadj))) +
       geom_point(aes(group=feature_id)) +
       # geom_point(aes(color = (feature_id %in% "P49792"))) +
@@ -299,8 +301,8 @@ shinyServer(function(input, output, session) {
   
   # Plot the String interaction of selected Protein
   output$plot_string_neighbors <- renderImage({
-    target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] == input$stringProtein),
-                                      unique(protein_id)]
+    target_id <- up[which(up[[input$fcolumn]] == input$stringProtein),
+                                      unique(Entry)]
     print(target_id)
     target_string <- up[Entry == target_id]$`Cross-reference_(STRING)`
     target_string <- strsplit(target_string, split = ";")[[1]]
@@ -373,8 +375,8 @@ shinyServer(function(input, output, session) {
     })
   # Table output
   output$table <- renderDataTable({
-    target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue),
-                                      unique(protein_id)]
+    target_id <- up[which(up[[input$fcolumn]] %in% input$fvalue),
+                                      unique(Entry)]
     up[Entry %in% target_id]
   })
   output$restable <- renderDataTable({
@@ -383,8 +385,8 @@ shinyServer(function(input, output, session) {
   
   # String table output
   output$stringtable <- renderDataTable({
-    target_id <- trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] == input$stringProtein),
-                                      unique(protein_id)]
+    target_id <- up[which(up[[input$fcolumn]] == input$stringProtein),
+                                      unique(Entry)]
     target_string <- up[Entry == target_id]$`Cross-reference_(STRING)`
     target_string <- strsplit(target_string, split = ";")[[1]]
     
