@@ -7,8 +7,12 @@ canCrop <- require(magick) # This package is not available on windows (used to c
 
 
 # data preparation
+setwd("www/data")
 pass <- readRDS("pass.rda")
-load("data_.rda")
+trace_annotation_cum <- readRDS("trace_ann.rda")
+calibration_functions <- readRDS("calibration_functions.rda")
+up <- readRDS("uniprotMapping.rda")
+## load("data_.rda")
 trall <- readRDS("proteinTracesLong_mean_sd_sem.rda")
 tr <- trall[id %in% c("P37198", "Q7Z3B4", "Q9BVL2")]
 stringLinks <- fread("9606.protein.links.v10.5.HeLaSubset.txt")
@@ -18,6 +22,9 @@ stringIdMap <- readRDS("stringIdMapUniq.rda")
 # diffExprProt <- merge(diffExprProt, trace_annotation_cum, by.x = "feature_id", by.y = "protein_id")
 # saveRDS(diffExprProt, "differentiallyExpressedProteinsAnn.rda")
 diffExprProt <- readRDS("differentiallyExpressedProteinsAnn.rda")
+setwd("../../")
+
+# Source the functions
 source("searchSemiTargeted.R")
 source("tracesMethods.R")
 source("stringMethods.R")
@@ -76,7 +83,7 @@ shinyServer(function(input, output, session) {
   ## generate selected protein SEC traces plot
   ######################################
   ######################################
-  lx.frc <- seq(5,(ncol(prot_int_r1$traces)-1),5)
+  lx.frc <- seq(5,(max(tr$fraction)-1),5)
   lx <- paste(lx.frc , round(calibration_functions$SECfractionToMW(lx.frc), 1) , sep = '(' )
   lx <- paste(lx, "", sep = ')' )
   
