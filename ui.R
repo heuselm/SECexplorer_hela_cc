@@ -38,7 +38,7 @@ shinyUI(fluidPage(
                        checkboxInput("error_bars", "Plot error bars", value = TRUE),
                        uiOutput("errortype")
       ),
-      conditionalPanel('input.dataset === "Search"',
+      conditionalPanel('input.dataset === "Search for co-eluting proteins"',
                        selectizeInput("trace", label = "Select experimental condition",
                                       choices= c("Mitosis", "Interphase")),
                                       ## choices = paste0(c(rep("mit_r",3), rep("int_r", 3)),c(1,2,3)), selected = 1, multiple = FALSE),
@@ -47,12 +47,12 @@ shinyUI(fluidPage(
                        actionButton("reset", label = "Reset")
                        # plotOutput("plot_st_string")
       ),
-      conditionalPanel('input.dataset === "DiffExpr"',
+      conditionalPanel('input.dataset === "View differential Association"',
                        p("To select Proteins of interest drag a selection box and press 'Paste Selection'"),
                        actionButton("pastediff", label = "Paste Selection")
                        # plotOutput("plot_st_string")
       ),
-      conditionalPanel('input.dataset === "String"',
+      conditionalPanel('input.dataset === "Query String Interactors"',
                        uiOutput("stringProt"),
                        uiOutput("nrinteractors"),
                        uiOutput("confidencethr"),
@@ -60,7 +60,7 @@ shinyUI(fluidPage(
                        actionButton("paste", label = "Paste Interactors")
                        # plotOutput("plot_st_string")
       ),
-      conditionalPanel('input.dataset == "Welcome"',
+      conditionalPanel('input.dataset == "Usage instructions"',
                        helpText("Select a tab to start")
       ),
       p("DISCLAIMER: THIS DATA IS UNPUBLISHED WORK - share only with permission of the creators."),
@@ -73,7 +73,7 @@ shinyUI(fluidPage(
     mainPanel(
       tabsetPanel(
         id = 'dataset',
-        tabPanel('Welcome', 
+        tabPanel('Usage instructions', 
                  p("Welcome to the Hela CCsec Viewer. Please wait a few seconds while the data is loading..."),
                  h1("Usage Instructions"),
                  p("This app has 2 main functionalities, acessible over the tabs above:"),
@@ -151,7 +151,7 @@ shinyUI(fluidPage(
                  p(),
                  dataTableOutput("table")
         ),
-        tabPanel('Search',
+        tabPanel('Search for co-eluting proteins',
                  uiOutput("plots"),
                  fluidRow(
                    column(3, uiOutput("sliderglob")),
@@ -160,13 +160,13 @@ shinyUI(fluidPage(
                  dataTableOutput("restable"),
                  p(class = 'text-center', downloadButton('downloadData', 'Download'))
         ),
-        tabPanel('DiffExpr',
+        tabPanel('View differential Association',
                  p("Volcano plot indicating differentially behaving Proteins acrosss the cell cycle"),
                  plotlyOutput("plot_diffexpr", height = 600)
                  # verbatimTextOutput("hover"),
                  # verbatimTextOutput("diffexprsel")
         ),
-        tabPanel('String',
+        tabPanel('Query String Interactors',
                  p("String interaction partners"),
                  fluidRow(
                    column(12, align="center",
