@@ -204,7 +204,7 @@ plotSemiTargeted <- function(search_result,
 #' @param zscore_cutoff Numeric, Specifies how many standard deviations below the mean
 #' sibling peptide correlation the cutoff for filtering is to be set.
 #' @details The mean correlation between all peptides of the target protein is
-#' calculated (mean sibling peptide correllation) as well as the mean correllations
+#' calculated (mean sibling peptide correllation) as well as the mean correllation
 #' of all peptides of the target protein with peptides of all other proteins. 
 #' @return A ggplot of locally corellating traces.
 #' @export
@@ -228,5 +228,23 @@ filterSemiSearchResult <- function(search_result,
   return(res)
 }
 
+#' Adapter for semi targeted search in shiny
+#' @description Builds a traces object on the fly so the semitargeted search
+#' function can be used.
+#' @import data.table
+#' @param traces a long formatted traces object
+#' @return An object of class traces.
+#' @export
 
+shinySemiTargetedSearchAdapter <- function(traces){
+  fractions <- min(traces$fraction):max(traces$fraction)
+  tr2 <- dcast(traces, id + Gene_names  ~ fraction, value.var="intensity_mean", fun.aggregate = mean)
+  setcolorder(tr2, c(2:ncol(tr2), 1))
+  res <- list(traces=tr2[,-1, with=FALSE],
+              trace_type="protein",
+              trace_annotation=data.table(id=tr2$id, protein_id=tr2$id, Gene_names=tr2$Gene_names),
+              fraction_annotation=data.table(id=fractions))
+  class(res) <- "traces"
+  return(res)
+}
 

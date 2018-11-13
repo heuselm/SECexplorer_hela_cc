@@ -40,7 +40,8 @@ shinyUI(fluidPage(
       ),
       conditionalPanel('input.dataset === "Search"',
                        selectizeInput("trace", label = "Select experimental condition",
-                                      choices = paste0(c(rep("mit_r",3), rep("int_r", 3)),c(1,2,3)), selected = 1, multiple = FALSE),
+                                      choices= c("Mitosis", "Interphase")),
+                                      ## choices = paste0(c(rep("mit_r",3), rep("int_r", 3)),c(1,2,3)), selected = 1, multiple = FALSE),
                        uiOutput("baseProt"),
                        actionButton("search", label = "Perform Search"),
                        actionButton("reset", label = "Reset")

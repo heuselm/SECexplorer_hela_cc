@@ -9,7 +9,7 @@ canCrop <- require(magick) # This package is not available on windows (used to c
 # data preparation
 setwd("www/data")
 pass <- readRDS("pass.rda")
-trace_annotation_cum <- readRDS("trace_ann.rda")
+## trace_annotation_cum <- readRDS("trace_ann.rda")
 calibration_functions <- readRDS("calibration_functions.rda")
 up <- readRDS("uniprotMapping.rda")
 ## load("data_.rda")
@@ -147,9 +147,9 @@ shinyServer(function(input, output, session) {
   # Selection plot
 
   output$plot1 <- renderPlot({
-    repl <- as.numeric(gsub(".*_r","",input$trace))
-   cond <- ifelse(gsub("_r.*","",input$trace) == "mit", "Mitosis", "Interphase")
-    p <- ggplot(target_id_traces()[replicate == repl], aes(x=fraction, y=intensity)) +
+    ## repl <- as.numeric(gsub(".*_r","",input$trace))
+   ## cond <- ifelse(gsub("_r.*","",input$trace) == "mit", "Mitosis", "Interphase")
+    p <- ggplot(target_id_traces(), aes(x=fraction, y=intensity_mean)) + #[replicate == repl]
       xlab("SEC fraction number(apparent MW[kDa])")+
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)") +
       geom_line(aes(color = Gene_names, linetype = condition), size = 1, alpha = 0.8) +
@@ -167,8 +167,8 @@ shinyServer(function(input, output, session) {
     }
 
     p <- p +
-      geom_line(data = target_id_traces()[replicate == repl & condition == cond & eval(as.name(input$fcolumn)) == input$baseProtein],
-                aes_string(x='fraction', y='intensity', color='Gene_names', linetype = 'condition'), lwd=2)
+      geom_line(data = target_id_traces()[condition == input$trace & eval(as.name(input$fcolumn)) == input$baseProtein],
+                aes_string(x='fraction', y='intensity_mean', color='Gene_names', linetype = 'condition'), lwd=2)
 
     p
   })
@@ -207,7 +207,9 @@ shinyServer(function(input, output, session) {
     # Perform the search
     target_id <- up[which(up[[input$fcolumn]] == input$baseProtein),
                                       unique(Entry)]
-    traces <- get(paste0("prot_", input$trace))
+    ## traces <- get(paste0("prot_", input$trace))
+    # We take the mean intensity so the replicate does not matter
+    traces <- shinySemiTargetedSearchAdapter(tr[condition == "Mitosis" & replicate == 1])
     searchRes <<- searchSemiTargeted(traces,
                        Id = target_id,
                        lower_bound = apex$bound_left,
@@ -243,7 +245,7 @@ shinyServer(function(input, output, session) {
       }
       if(!is.null(input$globalCorr)){
         searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
-      }
+     }
     # ids <- unique(c(restable$Protein1, restable$Protein2))
     ids <- unique(c(input$fcolumn, strids))
     print(ids)
