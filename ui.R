@@ -66,14 +66,14 @@ shinyUI(fluidPage(
       p("DISCLAIMER: THIS DATA IS UNPUBLISHED WORK - share only with permission of the creators."),
       p("Amon S., Koehler, M., Heusel M., Kutay U., Aebersold R."),
       p("Contact: heuselm@imsb.biol.ethz.ch")
-      
+
     ),
-    
+
     # The panel for the plot output
     mainPanel(
       tabsetPanel(
         id = 'dataset',
-        tabPanel('Usage instructions', 
+        tabPanel('Usage instructions',
                  p("Welcome to the Hela CCsec Viewer. Please wait a few seconds while the data is loading..."),
                  h1("Usage Instructions"),
                  p("This app has 2 main functionalities, acessible over the tabs above:"),

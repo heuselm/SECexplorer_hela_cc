@@ -290,7 +290,7 @@ shinyServer(function(input, output, session) {
     selectInput("stringProtein", "Search Protein", input$fvalue)
   })
   output$nrinteractors <- renderUI({
-    sliderInput("nrint", "Nr interactors", 0, 100, value = 10, step = 1)
+    sliderInput("nrint", "Nr interactors", 0, 20, value = 10, step = 1)
   })
   output$confidencethr <- renderUI({
     sliderInput("conf", "Confidence threshold", 0, 1000, value = 400, step = 5)
