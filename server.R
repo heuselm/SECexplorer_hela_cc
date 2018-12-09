@@ -194,6 +194,15 @@ shinyServer(function(input, output, session) {
   # Result plot
 
   observeEvent(input$search, {
+    # Make download button appear
+    output$downloadData <- downloadHandler(
+      filename = function(){ paste0("Tageted_search_result_", input$baseProtein,".csv")},
+      content = function(file){
+        write.csv(file = file, x = searchResFilt(), quote = F, row.names = F)
+      }
+    )
+    output$downloadSemiTargetedRes <- renderUI({downloadButton('downloadData', 'Download')})
+
     # Render a new Plot
     output$plots <- renderUI({
       plotlyOutput("plot2")
@@ -239,49 +248,44 @@ shinyServer(function(input, output, session) {
     })
 
   # Watch the pasteInteractors button
-  observeEvent(input$paste, {
+    observeEvent(input$paste, {
       if(!is.null(input$corr)){
         searchResFilt(searchRes[cor >= input$corr])
       }
       if(!is.null(input$globalCorr)){
         searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
-     }
+      }
     # ids <- unique(c(restable$Protein1, restable$Protein2))
-    ids <- unique(c(input$fcolumn, strids))
-    print(ids)
-
-    updateSelectizeInput(session, "fvalue", selected = ids)
+      ids <- unique(c(input$fcolumn, strids))
+      print(ids)
+      
+      updateSelectizeInput(session, "fvalue", selected = ids)
     })
 
   # Watch the slider input
-  observeEvent({
-    input$corr
-    input$globalCorr}, {
-      if(!is.null(input$corr)){
-        searchResFilt(searchRes[cor >= input$corr])
-      }
-      if(!is.null(input$globalCorr)){
-        searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
-      }
-    })
-
-  # Table output
-  output$table <- renderDataTable({
-    target_id <- up[which(up[[input$fcolumn]] %in% input$fvalue),
+    observeEvent({
+      input$corr
+      input$globalCorr}, {
+        if(!is.null(input$corr)){
+          searchResFilt(searchRes[cor >= input$corr])
+        }
+        if(!is.null(input$globalCorr)){
+          searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
+        }
+      })
+    
+                                        # Table output
+    output$table <- renderDataTable({
+      target_id <- up[which(up[[input$fcolumn]] %in% input$fvalue),
                                       unique(Entry)]
-    up[Entry %in% target_id]
+      up[Entry %in% target_id]
+    })
+    output$restable <- renderDataTable({
+      searchResFilt()
+    })
   })
-  output$restable <- renderDataTable({
-    searchResFilt()
-  })
-    # Download content
-    output$downloadData <- downloadHandler(
-      filename = function(){ paste0("Tageted_search_result_", input$baseProtein,".csv")},
-      content = function(file){
-        write.csv(file = file, x = searchResFilt(), quote = F, row.names = F)
-      }
-    )
-  })
+  # Download content
+  output$downloadSemiTargetedRes <- renderUI("")
   ###########################
   ## Query String interactors tab
   ###########################

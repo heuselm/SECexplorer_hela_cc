@@ -158,7 +158,7 @@ shinyUI(fluidPage(
                    column(3, uiOutput("sliderloc"))
                  ),
                  dataTableOutput("restable"),
-                 p(class = 'text-center', downloadButton('downloadData', 'Download'))
+                 p(class = 'text-center', uiOutput("downloadSemiTargetedRes"))
         ),
         tabPanel('View differential Association',
                  p("Volcano plot indicating differentially behaving Proteins acrosss the cell cycle"),
