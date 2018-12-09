@@ -42,6 +42,11 @@ idcols <- names(up)[c(1, 4, 5, 13, 19:23)]
 
 pwd <- "mypassword"
 
+# Load the differential expression data
+diffExprProt <- readRDS("differentiallyExpressedProteins.rda")
+trace_annotation_cum <- readRDS("trace_annotation_cum.rda")
+diffExprProt <- merge(diffExprProt, trace_annotation_cum, by.x = "feature_id", by.y = "protein_id")
+
 ############################
 ## Create the data directory
 ############################
@@ -55,3 +60,4 @@ saveRDS(up, "uniprotMapping.rda")
 saveRDS(protTraces, "proteinTracesLong_mean_sd_sem.rda")
 saveRDS(pwd, "pass.rda")
 saveRDS(idcols, "idcols.rda")
+saveRDS(diffExprProt, "differentiallyExpressedProteinsAnn.rda")
