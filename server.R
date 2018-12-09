@@ -86,9 +86,9 @@ shinyServer(function(input, output, session) {
   })
 
   ## Plot the selected traces
-  output$plot <- renderPlotly({
+  viewerPlot <- function(traces){
     # PLOT
-    p <- ggplot(target_id_traces(), aes(x=fraction, y=intensity_mean + 1)) +
+    p <- ggplot(traces, aes(x=fraction, y=intensity_mean + 1)) +
       xlab("SEC fraction number(apparent MW[kDa])") +
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)")
 
@@ -127,9 +127,22 @@ shinyServer(function(input, output, session) {
     if (input$logscale){
       p <- p + scale_y_log10()
     }
+    return(p)
+  }
 
-    ggplotly(p)
+  output$plot <- renderPlotly({
+    vplot <<- viewerPlot(target_id_traces())
+    ggplotly(vplot)
   })
+
+  ## Download the displayed plot
+  output$downloadPlot <- downloadHandler(
+    filename = function() { paste("currentPlot", '.pdf', sep='') },
+    content = function(file) {
+      ggsave(file, width=10, height=6, plot = vplot, device = "pdf")
+    }
+  )
+
   ###########################
   ## Search for co-eluting proteins tab
   ###########################

@@ -149,7 +149,8 @@ shinyUI(fluidPage(
         tabPanel('Viewer',       
                  plotlyOutput("plot", height = 600),
                  p(),
-                 dataTableOutput("table")
+                 dataTableOutput("table"),
+                 downloadButton("downloadPlot", "Download as PDF")
         ),
         tabPanel('Search for co-eluting proteins',
                  uiOutput("plots"),
