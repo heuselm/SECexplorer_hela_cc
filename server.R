@@ -286,6 +286,22 @@ shinyServer(function(input, output, session) {
       searchResFilt()
     })
   })
+
+  ## Watch the pasteInteractors button for the semitargeted search
+  observeEvent(input$pastediff, {
+      if(!is.null(input$corr)){
+          searchResFilt(searchRes[cor >= input$corr])
+      }
+      if(!is.null(input$globalCorr)){
+          searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
+      }
+      paste_ids <- up[Entry %in% searchResFilt()$id][[input$fcolumn]]
+      ids <- unique(c(input$fvalue, paste_ids))
+      print(ids)
+
+      updateSelectizeInput(session, "fvalue", selected = ids)
+  })
+
   # Download content
   output$downloadSemiTargetedRes <- renderUI("")
 
@@ -387,14 +403,9 @@ shinyServer(function(input, output, session) {
 
   ## Watch the pasteInteractors button for the string interactors
   observeEvent(input$paste, {
-      ## if(!is.null(input$corr)){
-      ##     searchResFilt(searchRes[cor >= input$corr])
-      ## }
-      ## if(!is.null(input$globalCorr)){
-      ##     searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
-      ## }
-      # ids <- unique(c(restable$Protein1, restable$Protein2))
-      ids <- unique(c(input$fvalue, strids))
+      stringids <- unique(string_id_traces()$id)
+      paste_ids <- up[Entry %in% stringids][[input$fcolumn]]
+      ids <- unique(c(input$fvalue, paste_ids))
       print(ids)
 
       updateSelectizeInput(session, "fvalue", selected = ids)

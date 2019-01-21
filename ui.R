@@ -44,12 +44,12 @@ shinyUI(fluidPage(
                                       ## choices = paste0(c(rep("mit_r",3), rep("int_r", 3)),c(1,2,3)), selected = 1, multiple = FALSE),
                        uiOutput("baseProt"),
                        actionButton("search", label = "Perform Search"),
+                       actionButton("pastediff", label = "Paste Selection"),
                        actionButton("reset", label = "Reset")
                        # plotOutput("plot_st_string")
       ),
       conditionalPanel('input.dataset === "View differential Association"',
                        p("To select Proteins of interest click the protein or drag a selection box around multiple proteins")
-                       ## actionButton("pastediff", label = "Paste Selection")
                        # plotOutput("plot_st_string")
       ),
       conditionalPanel('input.dataset === "Query String Interactors"',
