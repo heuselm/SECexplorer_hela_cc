@@ -6,6 +6,8 @@ obtainNeighborImage <- function (identifiers, required_score = 400, add_white_no
   identifiers <- identifiers[identifiers != ""]
   if (length(identifiers) > 400) {
     stop("Input is >400 id's long")
+  }else if(length(identifiers) == 0){
+    identifiers <- "9606.ENSP00000264883" # Needs a default because sometimes the query prot is not loaded
   }
 
   urlStr <- paste0("http://string-db.org/api/", type,"/network")
