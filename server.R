@@ -31,7 +31,7 @@ source("tracesMethods.R")
 source("stringMethods.R")
 # string_db <- STRINGdb$new( version="10", species=9606, score_threshold=400, input_directory="" )
 
-idcols <- readRDS("www/data/idcols.rda")
+## idcols <- readRDS("www/data/idcols.rda")
 ## for (i in seq_along(idcols)){
 ##   assign(idcols[i], up[idcols][[i]])
 ## }
