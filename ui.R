@@ -180,6 +180,7 @@ shinyUI(fluidPage(
                           imageOutput("plot_string_neighbors")
                    )
                  ),
+                 plotlyOutput("stringtraces", height=400),
                  dataTableOutput("stringtable")
         )
       )

@@ -265,21 +265,6 @@ shinyServer(function(input, output, session) {
       ggplotly(p)
     })
 
-  # Watch the pasteInteractors button
-    observeEvent(input$paste, {
-      if(!is.null(input$corr)){
-        searchResFilt(searchRes[cor >= input$corr])
-      }
-      if(!is.null(input$globalCorr)){
-        searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
-      }
-    # ids <- unique(c(restable$Protein1, restable$Protein2))
-      ids <- unique(c(input$fcolumn, strids))
-      print(ids)
-
-      updateSelectizeInput(session, "fvalue", selected = ids)
-    })
-
   # Watch the slider input
     observeEvent({
       input$corr
@@ -303,6 +288,7 @@ shinyServer(function(input, output, session) {
   })
   # Download content
   output$downloadSemiTargetedRes <- renderUI("")
+
   ###########################
   ## Query String interactors tab
   ###########################
@@ -317,6 +303,25 @@ shinyServer(function(input, output, session) {
     sliderInput("conf", "Confidence threshold", 0, 1000, value = 400, step = 5)
   })
 
+  ## Create the output table
+  string_table <- eventReactive(target_string(),{
+      restable <- stringLinks[protein1 == target_string() | protein2 == target_string()]
+      restable$Protein1 <- stringIdMap[restable$protein1]
+      restable$Protein2 <- stringIdMap[restable$protein2]
+      restable <- restable[order(combined_score, Protein1, Protein2, decreasing = T),.(Protein1, Protein2, combined_score)]
+      ## strids <- unique(restable$Protein1)[1:input$nrint] #Make the ids available globally
+      restable
+  })
+
+  ## collect chromatograms of all string interactors
+  string_id_traces <- eventReactive(string_table(),{
+      string_ids <- unique(string_table()$Protein1)[1:input$nrint]
+      ## target_ids <- unique(up[Gene_names %in% string_ids][[input$fcolumn]])
+      target_id_traces <- tr[Gene_names %in% string_ids]
+      target_id_traces[, monomer_fraction:=calibration_functions$MWtoFraction(protein_mw)]
+      target_id_traces
+  })
+
     # Plot the String interaction networks
     # output$plot_st_string <- renderPlot({
     #   # string_ids <- string_db$map(searchResFilt(), my_data_frame_id_col_names = "id")
@@ -328,25 +333,21 @@ shinyServer(function(input, output, session) {
     # })
 
   # Plot the String interaction of selected Protein
-  output$plot_string_neighbors <- renderImage({
+  target_string <- eventReactive(input$stringProtein,{
     target_id <- up[which(up[[input$fcolumn]] == input$stringProtein),
-                                      unique(Entry)]
-    print(target_id)
+                    unique(Entry)]
+    ## print(target_id)
     target_string <- up[Entry == target_id]$`Cross-reference_(STRING)`
     target_string <- strsplit(target_string, split = ";")[[1]]
-    print(target_string)
-    # target_neighbors <- string_db$get_neighbors(target_string)
-    # print(target_neighbors)
-    # p <- string_db$plot_network(c(target_string, target_neighbors), add_link = F, add_summary = F)
-    # p
-    # width  <- session$clientData$output_plot_width
-    # height <- session$clientData$output_plot_height
-    # mysvgwidth <- width/96
-    # mysvgheight <- height/96
+    ## print(target_string)
+  })
+
+  ## Render the string image
+  output$plot_string_neighbors <- renderImage({
 
     outfile <- tempfile(fileext = '.svg')
     print(outfile)
-    obtainNeighborImage(target_string, required_score = input$conf,
+    obtainNeighborImage(target_string(), required_score = input$conf,
                         add_white_nodes = input$nrint, type = "svg",
                         network_flavor = "evidence", filename = outfile, verbose = T)
     # if(canCrop){
@@ -373,10 +374,32 @@ shinyServer(function(input, output, session) {
          alt = "Cannot display string network")
   }, deleteFile = F)
 
-  output$volcanotraces <- renderPlotly({
-      vplot <- viewerPlot(target_id_traces(), split=F)
+  # Plot the string interactor traces
+  output$stringtraces <- renderPlotly({
+      vplot <- viewerPlot(string_id_traces(), split=F)
       ggplotly(vplot)
-      
+  })
+
+  # String table output
+  output$stringtable <- renderDataTable({
+    string_table()
+  })
+
+  ## Watch the pasteInteractors button for the string interactors
+  observeEvent(input$paste, {
+      ## if(!is.null(input$corr)){
+      ##     searchResFilt(searchRes[cor >= input$corr])
+      ## }
+      ## if(!is.null(input$globalCorr)){
+      ##     searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
+      ## }
+      # ids <- unique(c(restable$Protein1, restable$Protein2))
+      ids <- unique(c(input$fvalue, strids))
+      print(ids)
+
+      updateSelectizeInput(session, "fvalue", selected = ids)
+  })
+
   #####################################
   ## View differential Association tab
   ###################################
@@ -442,29 +465,6 @@ shinyServer(function(input, output, session) {
   ##   if (is.null(d)) "Select events appear here (unhover to clear)" else d
   ## })
 
-  ## Watch the pasteSelection button
-  observeEvent(input$pastediff, {
-    sel <- event_data("plotly_selected", source = "plot_diffexpr")
-    print(sel)
-    ids <- unique(diffExprProt[sel[sel$curveNumber == 0,]$pointNumber + 1][[input$fcolumn]])
-    print(ids)
-    updateSelectizeInput(session, "fvalue", selected = ids)
-  })
-
-  # String table output
-  output$stringtable <- renderDataTable({
-    target_id <- up[which(up[[input$fcolumn]] == input$stringProtein),
-                    unique(Entry)]
-    target_string <- up[Entry == target_id]$`Cross-reference_(STRING)`
-    target_string <- strsplit(target_string, split = ";")[[1]]
-
-    restable <- stringLinks[protein1 == target_string | protein2 == target_string]
-    restable$Protein1 <- stringIdMap[restable$protein1]
-    restable$Protein2 <- stringIdMap[restable$protein2]
-    restable <- restable[order(combined_score, Protein1, Protein2, decreasing = T),.(Protein1, Protein2, combined_score)]
-    strids <<- unique(restable$Protein1)[1:input$nrint] #Make the ids available globally
-    restable
-  })
 
   #########################
   ## Password input
