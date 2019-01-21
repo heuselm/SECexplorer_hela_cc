@@ -86,13 +86,13 @@ shinyServer(function(input, output, session) {
   })
 
   ## Plot the selected traces
-  viewerPlot <- function(traces){
+  viewerPlot <- function(traces, showmonomers=T, log=F, split=T, errbars=T, errtype="Standard deviation (SD)"){
     # PLOT
     p <- ggplot(traces, aes(x=fraction, y=intensity_mean + 1)) +
       xlab("SEC fraction number(apparent MW[kDa])") +
       ylab("Protein level SWATH-MS intensity (top2 peptide sum)")
 
-    if (input$split_plot){
+    if (split){
       p <- p + geom_line(aes(group = Gene_names, color = Gene_names), size = 1, alpha = 0.8) +
         theme_bw() +
         ## ggtitle(unique(target_id_traces()$Gene_names)) +
@@ -120,18 +120,23 @@ shinyServer(function(input, output, session) {
                         position = position_dodge(0.2))
       }
     }
-    if(input$show_monomers){
+    if(showmonomers){
       p <- p + geom_point(aes(x = monomer_fraction, color = Gene_names, y = 0), shape = 23, fill = "white", size = 3)
     }
 
-    if (input$logscale){
+    if (log){
       p <- p + scale_y_log10()
     }
     return(p)
   }
 
   output$plot <- renderPlotly({
-    vplot <<- viewerPlot(target_id_traces())
+    vplot <<- viewerPlot(target_id_traces(),
+                         log=input$logscale,
+                         showmonomers=input$show_monomers,
+                         split=input$split_plot,
+                         errbars=input$error_bars,
+                         errtype=input$ertype)
     ggplotly(vplot)
   })
 
