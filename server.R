@@ -3,7 +3,7 @@ library(ggplot2)
 library(plotly)
 library(data.table)
 library(STRINGdb)
-canCrop <- require(magick) # This package is not available on windows (used to crop images)
+## canCrop <- require(magick) # This package is not available on some windows installs
 
 
 # data preparation
