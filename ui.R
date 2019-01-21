@@ -63,9 +63,13 @@ shinyUI(fluidPage(
       conditionalPanel('input.dataset == "Usage instructions"',
                        helpText("Select a tab to start")
       ),
+      br(),
+      br(),
+      br(),
       p("DISCLAIMER: THIS DATA IS UNPUBLISHED WORK - share only with permission of the creators."),
-      p("Amon S., Koehler, M., Heusel M., Kutay U., Aebersold R."),
-      p("Contact: heuselm@imsb.biol.ethz.ch")
+      p("Heusel M., Frank M., Koehler, M. Amon S., Kutay U., Aebersold R."),
+      p("Contact: heuselm@imsb.biol.ethz.ch"),
+      p("Citation: 'A global screen for interaction rearrangements of the mitotic proteome by SEC-SWATH-MS (unpublished)'")
 
     ),
 
