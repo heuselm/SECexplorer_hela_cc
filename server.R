@@ -21,7 +21,7 @@ stringIdMap <- readRDS("stringIdMapUniq.rda")
 # diffExprProt <- readRDS("differentiallyExpressedProteins.rda")
 # diffExprProt <- merge(diffExprProt, trace_annotation_cum, by.x = "feature_id", by.y = "protein_id")
 # saveRDS(diffExprProt, "differentiallyExpressedProteinsAnn.rda")
-diffExprProt <- readRDS("differentiallyExpressedProteinsAnn.rda")
+diffExprProt <- readRDS("differentiallyExpressedProteinsMinPAnn.rda")
 setwd("../../")
 default_proteins <- c("NUP54", "NUP62", "NUP58 KIAA0410 NUPL1")
 
