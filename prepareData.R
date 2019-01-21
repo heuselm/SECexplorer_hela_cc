@@ -46,6 +46,9 @@ pwd <- "mypassword"
 diffExprProt <- readRDS("differentiallyExpressedProteins.rda")
 trace_annotation_cum <- readRDS("trace_annotation_cum.rda")
 diffExprProt <- merge(diffExprProt, trace_annotation_cum, by.x = "feature_id", by.y = "protein_id")
+diffExprProtMinP <- readRDS("www/data/pcscores_best.rda")
+ann <- subset(up, select=setdiff(idcols, names(diffExprProtMinP)))
+diffExprProtMinP <- merge(diffExprProtMinP, ann, by.x="feature_id", by.y="Entry")
 
 ############################
 ## Create the data directory
@@ -61,3 +64,4 @@ saveRDS(protTraces, "proteinTracesLong_mean_sd_sem.rda")
 saveRDS(pwd, "pass.rda")
 saveRDS(idcols, "idcols.rda")
 saveRDS(diffExprProt, "differentiallyExpressedProteinsAnn.rda")
+saveRDS(diffExprProtMinP, "differentiallyExpressedProteinsMinPAnn.rda")
