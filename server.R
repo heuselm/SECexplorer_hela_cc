@@ -276,7 +276,7 @@ shinyServer(function(input, output, session) {
     # ids <- unique(c(restable$Protein1, restable$Protein2))
       ids <- unique(c(input$fcolumn, strids))
       print(ids)
-      
+
       updateSelectizeInput(session, "fvalue", selected = ids)
     })
 
@@ -291,8 +291,7 @@ shinyServer(function(input, output, session) {
           searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
         }
       })
-    
-                                        # Table output
+    ## Table output
     output$table <- renderDataTable({
       target_id <- up[which(up[[input$fcolumn]] %in% input$fvalue),
                                       unique(Entry)]
@@ -374,7 +373,10 @@ shinyServer(function(input, output, session) {
          alt = "Cannot display string network")
   }, deleteFile = F)
 
-
+  output$volcanotraces <- renderPlotly({
+      vplot <- viewerPlot(target_id_traces(), split=F)
+      ggplotly(vplot)
+      
   #####################################
   ## View differential Association tab
   ###################################
@@ -384,24 +386,61 @@ shinyServer(function(input, output, session) {
   output$plot_diffexpr <- renderPlotly({
     setkeyv(diffExprProt, input$fcolumn)
     # print(trace_annotation_cum[which(trace_annotation_cum[[input$fcolumn]] %in% input$fvalue)]$protein_id)
-    highlight_proteins <- diffExprProt[feature_id %in% up[which(up[[input$fcolumn]] %in% input$fvalue)]$Entry]
-    p <- ggplot(diffExprProt, aes(x = medianLog2FC, y = -log10(pBHadj))) +
-      geom_point(aes(group=feature_id)) +
-      # geom_point(aes(color = (feature_id %in% "P49792"))) +
+    highlight_proteins <- diffExprProt[diffExprProt[[input$fcolumn]] %in% input$fvalue]
+    p <- ggplot(as.data.frame(diffExprProt), aes(x = medianLog2FC, y = -log10(pBHadj))) +
+      geom_point(aes_string(group=input$fcolumn)) +
       geom_hline(yintercept = -log10(0.05)) +
       geom_vline(xintercept = c(1, -1)) +
-      geom_point(data = highlight_proteins, aes(group=feature_id), color="red") +
+      geom_point(data = highlight_proteins,
+                 aes_string(color=input$fcolumn), size=2) +
       theme_bw()
 
     ggplotly(p, source = "plot_diffexpr") %>% layout(dragmode = "select")
   })
 
-  # output$diffexprsel <- renderPrint({
-  #   d <- event_data("plotly_selected", source = "plot_diffexpr")
-  #   print(d$key)
-  #   # d <- paste0(unique(trace_annotation_cum[protein_id %in% d][[input$fcolumn]]))
-  #   if (is.null(d)) "Select events appear here (unhover to clear)" else d
-  # })
+
+  output$volcanotraces <- renderPlotly({
+    vplot <- viewerPlot(target_id_traces(), split=F)
+    ggplotly(vplot)
+  })
+
+  observeEvent(event_data("plotly_click", source="plot_diffexpr"),{
+    ed <- event_data("plotly_click", source="plot_diffexpr")
+    ## print(ed$pointNumber)
+    selected <- diffExprProt[[input$fcolumn]][ed$pointNumber + 1]
+    ## print(selected)
+    ids <- c(setdiff(input$fvalue, selected), setdiff(selected, input$fvalue))
+    ## print(ids)
+    updateSelectizeInput(session, "fvalue", selected = ids)
+  })
+
+    observeEvent(event_data("plotly_selected", source="plot_diffexpr"),{
+        ed <- event_data("plotly_selected", source="plot_diffexpr")
+        ## print(ed)
+        ## print(ed$pointNumber)
+        selected <- diffExprProt[[input$fcolumn]][ed[ed$curveNumber==0,]$pointNumber + 1]
+        ## For dragging we only want to unselect if all the points in the area
+        ## are selected. This is more intuitive than always having the difference
+        if(length(setdiff(selected,input$fvalue))==0){
+            ids <- setdiff(input$fvalue, selected)
+        }else{
+            ids <- unique(c(input$fvalue, selected))
+        }
+        ## print(ids)
+        updateSelectizeInput(session, "fvalue", selected = ids)
+    })
+
+  ## output$click <- renderPrint({
+  ##   d <- event_data("plotly_click", source="plot_diffexpr")
+  ##   if(is.null(d)) "Click on a point" else d
+  ## })
+
+  ## output$diffexprsel <- renderPrint({
+  ##   d <- event_data("plotly_selected", source = "plot_diffexpr")
+  ##   print(d$key)
+  ##   # d <- paste0(unique(trace_annotation_cum[protein_id %in% d][[input$fcolumn]]))
+  ##   if (is.null(d)) "Select events appear here (unhover to clear)" else d
+  ## })
 
   ## Watch the pasteSelection button
   observeEvent(input$pastediff, {

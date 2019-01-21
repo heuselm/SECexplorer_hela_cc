@@ -48,8 +48,8 @@ shinyUI(fluidPage(
                        # plotOutput("plot_st_string")
       ),
       conditionalPanel('input.dataset === "View differential Association"',
-                       p("To select Proteins of interest drag a selection box and press 'Paste Selection'"),
-                       actionButton("pastediff", label = "Paste Selection")
+                       p("To select Proteins of interest click the protein or drag a selection box around multiple proteins")
+                       ## actionButton("pastediff", label = "Paste Selection")
                        # plotOutput("plot_st_string")
       ),
       conditionalPanel('input.dataset === "Query String Interactors"',
@@ -166,8 +166,10 @@ shinyUI(fluidPage(
                  p(class = 'text-center', uiOutput("downloadSemiTargetedRes"))
         ),
         tabPanel('View differential Association',
-                 p("Volcano plot indicating differentially behaving Proteins acrosss the cell cycle"),
-                 plotlyOutput("plot_diffexpr", height = 600)
+                 ## p("Volcano plot indicating differentially behaving Proteins acrosss the cell cycle"),
+                 plotlyOutput("plot_diffexpr", height = 400),
+                 ## verbatimTextOutput("click"),
+                 plotlyOutput("volcanotraces", height = 400)
                  # verbatimTextOutput("hover"),
                  # verbatimTextOutput("diffexprsel")
         ),
