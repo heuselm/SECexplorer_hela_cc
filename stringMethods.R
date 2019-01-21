@@ -7,13 +7,13 @@ obtainNeighborImage <- function (identifiers, required_score = 400, add_white_no
   if (length(identifiers) > 400) {
     stop("Input is >400 id's long")
   }
-  
+
   urlStr <- paste0("http://string-db.org/api/", type,"/network")
-  
+
   identifier_str <- paste(identifiers, collapse = "%0D")
-  
+
   urlStr <- paste0(urlStr, "?identifiers=", identifier_str)
-  
+
   # Paste the parameters
   urlStr <- paste0(urlStr, "&")
   urlStr <- paste0(urlStr, "add_white_nodes=", add_white_nodes)
@@ -21,8 +21,7 @@ obtainNeighborImage <- function (identifiers, required_score = 400, add_white_no
   urlStr <- paste0(urlStr, "network_flavor=", network_flavor)
   urlStr <- paste0(urlStr, "&")
   urlStr <- paste0(urlStr, "required_score=", required_score)
-  if(verbose) message(urlStr
-                      )
+  if(verbose) message(urlStr)
   if (!is.null(file)){
     download.file(urlStr, destfile = filename, quiet = !verbose)
     # img <- readPNG(filename)
