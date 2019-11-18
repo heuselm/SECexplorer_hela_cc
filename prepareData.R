@@ -4,9 +4,9 @@
 
 # Load libraries
 library(data.table)
-library(devtools)
-devtools::install_github("CCprofiler/CCprofiler", ref = "helaCC")
-library(CCprofiler)
+## library(devtools)
+## devtools::install_github("CCprofiler/CCprofiler", ref = "helaCC")
+## library(CCprofiler)
 
 ## Setup variables
 shinydir <- "~/code/SECexplorer_hela_cc/"

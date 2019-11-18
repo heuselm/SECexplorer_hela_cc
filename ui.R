@@ -1,15 +1,70 @@
+####################################################################################
+# SECexplorer-cc cell cycle complex association dynamics viewer ####################
+# Part 1: UI.R #####################################################################
+####################################################################################
+# Domain: https://sec-explorer.shinyapps.io/hela_cellcycle/
+# Authors: Max Frank, Moritz Heusel
+# ##############################################################
+# About:
+# Browsing dynamic complex association maps in SECexplorer-cc:
+# SEC-SWATH-MS portrays the process of mitosis from the angle of protein
+# mass re-distribution across differently sized stable complexes resolved by SEC.
+# There remains a lot to be learned from the rich dataset generated, with the
+# prospect of discovering new proteins involved in cell cycle regulation and
+# of identifying new components of both static as well as dynamic assemblies.
+# To support community-based mining and interpretation of our dataset, we provide
+# a web tool, SECexplorer-cc (https://sec-explorer.shinyapps.io/hela_cellcycle/)
+# which offers four functionalities:
+# (i) Interactive viewing of protein SEC fractionation profiles in interphase and mitosis
+# (ii) Search for locally co-eluting proteins to identify putative new binding partners
+# showing strong co-elution within a certain range of target protein elution
+# (iii) Interactive display and protein selection from the differential association
+# score map. 
+# (iv) Display of one or multiple protein's fractionation profiles in reference to
+# the profiles of immediate interaction and/or functional partners dynamically
+# retrieved from StringDB (Szklarczyk et al., 2017). We expect that SECexplorer-cc
+# will support a community effort to fully leverage the rich information encoded by
+# the mitotic proteome rearrangement SEC-SWATH-MS data, which, ideally,
+# will support better understanding of modular proteome function along cell division.
+#####################################################################################
+
+## prepare environment
+if (!require("shiny")){
+  install.packages("shiny")
+}
+if (!require("shinythemes")){
+  install.packages("shinythemes")
+}
+if (!require("ggplot2")){
+  install.packages("ggplot2")
+}
+if (!require("plotly")){
+  install.packages("plotly")
+}
+if (!require("data.table")){
+  install.packages("data.table")
+}
+
+# load packages
 library(shiny)
 library(ggplot2)
 library(plotly)
 library(data.table)
 
-# data preparation
+
+## prepare data
 idcols <- readRDS("www/data/idcols.rda")
 
+## define user interface
+########################
+
 shinyUI(fluidPage(
+  
+  # Theme
+  theme = shinytheme("cosmo"),
 
   # Application title
-  headerPanel("SEC-SWATH-Explorer Hela CCL2 cell-cycle arrest Interphase vs. Mitosis - complex-centric viewer"),
+  headerPanel("SECexplorer-cc: Browsing HeLaCCL2 complex association states in interphase vs. mitosis", windowTitle = "SECexplorer-cc"),
 
   # Sidebar with a slider input for number of observations
   sidebarLayout(
@@ -66,10 +121,10 @@ shinyUI(fluidPage(
       br(),
       br(),
       br(),
-      p("DISCLAIMER: THIS DATA IS UNPUBLISHED WORK - share only with permission of the creators."),
-      p("Heusel M., Frank M., Koehler, M. Amon S., Kutay U., Aebersold R."),
-      p("Contact: heuselm@imsb.biol.ethz.ch"),
-      p("Citation: 'A global screen for interaction rearrangements of the mitotic proteome by SEC-SWATH-MS (unpublished)'")
+      p("Study authors:"),
+      p("Heusel M, Frank M, Koehler M, Amon S, Frommelt F, Rosenberger G, Bludau I, Aulakh S, Linder MI, Liu Y, Collins BC, Gstaiger M, Kutay U, Aebersold R"),
+      p("Contact: heuselm@imsb.biol.ethz.ch, aebersold@imsb.biol.ethz.ch"),
+      p("Citation: 'A global screen for assembly state changes of the mitotic proteome by SEC-SWATH-MS (unpublished)'")
 
     ),
 

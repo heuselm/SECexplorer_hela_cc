@@ -1,12 +1,66 @@
+####################################################################################
+# SECexplorer-cc cell cycle complex association dynamics viewer ####################
+# Part 2: Server.R #################################################################
+####################################################################################
+# Domain: https://sec-explorer.shinyapps.io/hela_cellcycle/
+# Authors: Max Frank, Moritz Heusel
+# ##############################################################
+# About:
+# Browsing dynamic complex association maps in SECexplorer-cc:
+# SEC-SWATH-MS portrays the process of mitosis from the angle of protein
+# mass re-distribution across differently sized stable complexes resolved by SEC.
+# There remains a lot to be learned from the rich dataset generated, with the
+# prospect of discovering new proteins involved in cell cycle regulation and
+# of identifying new components of both static as well as dynamic assemblies.
+# To support community-based mining and interpretation of our dataset, we provide
+# a web tool, SECexplorer-cc (https://sec-explorer.shinyapps.io/hela_cellcycle/)
+# which offers four functionalities:
+# (i) Interactive viewing of protein SEC fractionation profiles in interphase and mitosis
+# (ii) Search for locally co-eluting proteins to identify putative new binding partners
+# showing strong co-elution within a certain range of target protein elution
+# (iii) Interactive display and protein selection from the differential association
+# score map. 
+# (iv) Display of one or multiple protein's fractionation profiles in reference to
+# the profiles of immediate interaction and/or functional partners dynamically
+# retrieved from StringDB (Szklarczyk et al., 2017). We expect that SECexplorer-cc
+# will support a community effort to fully leverage the rich information encoded by
+# the mitotic proteome rearrangement SEC-SWATH-MS data, which, ideally,
+# will support better understanding of modular proteome function along cell division.
+#####################################################################################
+
+## prepare environment
+if (!require("STRINGdb")){
+  if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+  BiocManager::install("STRINGdb")
+}
+if (!require("shiny")){
+  install.packages("shiny")
+}
+if (!require("ggplot2")){
+  install.packages("ggplot2")
+}
+if (!require("plotly")){
+  install.packages("plotly")
+}
+if (!require("data.table")){
+  install.packages("data.table")
+}
+
+# load packages
 library(shiny)
 library(ggplot2)
 library(plotly)
 library(data.table)
 library(STRINGdb)
-## canCrop <- require(magick) # This package is not available on some windows installs
+
+# Source custom functions
+source("searchSemiTargeted.R")
+source("tracesMethods.R")
+source("stringMethods.R")
 
 
-# data preparation
+## prepare data
 setwd("www/data")
 pass <- readRDS("pass.rda")
 ## trace_annotation_cum <- readRDS("trace_ann.rda")
@@ -25,18 +79,8 @@ diffExprProt <- readRDS("differentiallyExpressedProteinsMinPAnn.rda")
 setwd("../../")
 default_proteins <- c("NUP54", "NUP62", "NUP58 KIAA0410 NUPL1")
 
-# Source the functions
-source("searchSemiTargeted.R")
-source("tracesMethods.R")
-source("stringMethods.R")
-# string_db <- STRINGdb$new( version="10", species=9606, score_threshold=400, input_directory="" )
-
-## idcols <- readRDS("www/data/idcols.rda")
-## for (i in seq_along(idcols)){
-##   assign(idcols[i], up[idcols][[i]])
-## }
-
-# server definition
+## define server roles
+#######################
 
 shinyServer(function(input, output, session) {
 
@@ -45,7 +89,7 @@ shinyServer(function(input, output, session) {
   searchResFilt <- reactiveVal(NULL)
 
   ############################
-  ## Viewer Tab
+  ## Viewer Tab              #
   ############################
 
   ## Generate Reactive Filter Value Field for UI, depending on filter column chosen
@@ -148,9 +192,9 @@ shinyServer(function(input, output, session) {
     }
   )
 
-  ###########################
-  ## Search for co-eluting proteins tab
-  ###########################
+  #######################################
+  ## Search for co-eluting proteins tab #
+  #######################################
 
   output$baseProt <- renderUI({
     selectInput("baseProtein", "Base Protein", input$fvalue)
@@ -305,9 +349,9 @@ shinyServer(function(input, output, session) {
   # Download content
   output$downloadSemiTargetedRes <- renderUI("")
 
-  ###########################
-  ## Query String interactors tab
-  ###########################
+  ##################################
+  ## Query String interactors tab  #
+  ##################################
 
   output$stringProt <- renderUI({
     selectInput("stringProtein", "Search Protein", input$fvalue)
@@ -338,16 +382,7 @@ shinyServer(function(input, output, session) {
       target_id_traces
   })
 
-    # Plot the String interaction networks
-    # output$plot_st_string <- renderPlot({
-    #   # string_ids <- string_db$map(searchResFilt(), my_data_frame_id_col_names = "id")
-    #   string_ids <- up[Entry %in% searchResFilt()$id]$`Cross-reference_(STRING)`
-    #   string_ids <- string_ids[string_ids != ""]
-    #   print(string_ids)
-    #   p <- string_db$plot_network(string_ids, add_link = T, add_summary = T)
-    #   p
-    # })
-
+    
   # Plot the String interaction of selected Protein
   target_string <- eventReactive(input$stringProtein,{
     target_id <- up[which(up[[input$fcolumn]] == input$stringProtein),
@@ -366,22 +401,7 @@ shinyServer(function(input, output, session) {
     obtainNeighborImage(target_string(), required_score = input$conf,
                         add_white_nodes = input$nrint, type = "svg",
                         network_flavor = "evidence", filename = outfile, verbose = T)
-    # if(canCrop){
-    #   tmpImg <-image_read_svg(outfile)
-    #   width <- image_info(tmpImg)$width
-    #   height <- image_info(tmpImg)$height
-    #   tmpImgC <- image_crop(tmpImg, geometry_area(height*1.25, height, (width-height*1.25)/2,0))
-    #   outfileC <- tempfile(fileext = '.png')
-    #   image_write(tmpImgC, path=outfileC, format = "png" )
-    #   print(outfileC)
-    #   # Return a list containing the filename
-    #   list(src = outfileC,
-    #        contentType = 'image/png',
-    #        # width="100%",
-    #        height="100%",
-    #        alt = "Cannot display string network")
-    # }else{
-    # }
+    
     # Return a list containing the filename
     list(src = outfile,
          contentType = 'image/svg+xml',
@@ -411,9 +431,9 @@ shinyServer(function(input, output, session) {
       updateSelectizeInput(session, "fvalue", selected = ids)
   })
 
-  #####################################
-  ## View differential Association tab
-  ###################################
+  ######################################
+  ## View differential Association tab #
+  ######################################
 
   # Plot the differentially expressed proteins between conditions
 
@@ -464,21 +484,9 @@ shinyServer(function(input, output, session) {
         updateSelectizeInput(session, "fvalue", selected = ids)
     })
 
-  ## output$click <- renderPrint({
-  ##   d <- event_data("plotly_click", source="plot_diffexpr")
-  ##   if(is.null(d)) "Click on a point" else d
-  ## })
-
-  ## output$diffexprsel <- renderPrint({
-  ##   d <- event_data("plotly_selected", source = "plot_diffexpr")
-  ##   print(d$key)
-  ##   # d <- paste0(unique(trace_annotation_cum[protein_id %in% d][[input$fcolumn]]))
-  ##   if (is.null(d)) "Select events appear here (unhover to clear)" else d
-  ## })
-
-
+  
   #########################
-  ## Password input
+  ## Password input       #
   #########################
 
   output$pwdfeedback <- renderText("Limited access. Enter password")
