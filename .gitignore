@@ -1,5 +1,4 @@
-data.rda
-*.rda
+rsconnect
 .Rhistory
 *.txt
 *.gz
