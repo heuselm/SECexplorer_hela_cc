@@ -90,7 +90,7 @@ shinyUI(fluidPage(
                                      value = TRUE),
                        checkboxInput("logscale", "LOG10 Y-Axis", value = FALSE),
                        checkboxInput("show_monomers", "Indicate monomer expected fractions", value = TRUE),
-                       checkboxInput("error_bars", "Plot error bars", value = TRUE),
+                       checkboxInput("error_bars", "Plot error area", value = TRUE),
                        uiOutput("errortype")
       ),
       conditionalPanel('input.dataset === "Search for co-eluting proteins"',

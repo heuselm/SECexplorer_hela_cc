@@ -103,7 +103,7 @@ shinyServer(function(input, output, session) {
     if(input$error_bars){
       selectizeInput("ertype",
                      label=NULL,
-                     choices=c("Standard Error (SEM)", "Standard deviation (SD)"),
+                     choices=c("Standard error of the mean (SEM)", "Standard deviation (SD)"),
                      selected=2)
     }else{
       NULL
@@ -149,18 +149,18 @@ shinyServer(function(input, output, session) {
     }
     if(input$error_bars){
       if(input$ertype == "Standard deviation (SD)"){
-        p <- p + geom_point(aes(color = Gene_names)) +
-          geom_errorbar(aes(ymin=intensity_mean-intensity_sd,
-                            ymax = intensity_mean+intensity_sd,
-                            color = Gene_names),
-                        position = position_dodge(0.2))
+        p <- p + p +
+          geom_ribbon(aes(ymin=intensity_mean-intensity_sd,
+                          ymax = intensity_mean+intensity_sd,
+                          fill = Gene_names),
+                      alpha = 0.2)
       }
-      if(input$ertype == "Standard Error (SEM)"){
-        p <- p + geom_point(aes(color = Gene_names)) +
-          geom_errorbar(aes(ymin=intensity_mean-intensity_se,
+      if(input$ertype == "Standard error of the mean (SEM)"){
+        p <- p +
+          geom_ribbon(aes(ymin=intensity_mean-intensity_se,
                             ymax = intensity_mean+intensity_se,
-                            color = Gene_names),
-                        position = position_dodge(0.2))
+                            fill = Gene_names),
+                        alpha = 0.2)
       }
     }
     if(showmonomers){
