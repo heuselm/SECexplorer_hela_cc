@@ -62,20 +62,19 @@ source("stringMethods.R")
 
 ## prepare data
 setwd("www/data")
-pass <- readRDS("pass.rda")
+# pass <- readRDS("pass.rda")
 ## trace_annotation_cum <- readRDS("trace_ann.rda")
 calibration_functions <- readRDS("calibration_functions.rda")
 up <- readRDS("uniprotMapping.rda")
 ## load("data_.rda")
-trall <- readRDS("proteinTracesLong_mean_sd_sem.rda")
-tr <- trall[id %in% c("P37198", "Q7Z3B4", "Q9BVL2")]
+tr <- readRDS("proteinTracesLong_mean_sd_sem.rda")
 stringLinks <- fread("9606.protein.links.v10.5.HeLaSubset.txt")
 stringIdMap <- readRDS("stringIdMapUniq.rda")
 #Load the differential expression data
 # diffExprProt <- readRDS("differentiallyExpressedProteins.rda")
 # diffExprProt <- merge(diffExprProt, trace_annotation_cum, by.x = "feature_id", by.y = "protein_id")
 # saveRDS(diffExprProt, "differentiallyExpressedProteinsAnn.rda")
-diffExprProt <- readRDS("differentiallyExpressedProteinsMinPAnn.rda")
+diffExprProt <- readRDS("differentiallyExpressedProteinsAnn.rda")
 setwd("../../")
 default_proteins <- c("NUP54", "NUP62", "NUP58 KIAA0410 NUPL1")
 
@@ -489,16 +488,16 @@ shinyServer(function(input, output, session) {
   ## Password input       #
   #########################
 
-  output$pwdfeedback <- renderText("Limited access. Enter password")
-  observeEvent(input$enterpwd, {
-      if(input$pwd == pass){
-        tr <<- trall
-        output$pwdfeedback <- renderText("Password correct")
-      } else{
-        tr <<- trall[id %in% c("P37198", "Q7Z3B4", "Q9BVL2")]
-        output$pwdfeedback <- renderText("Password incorrect")
-      }
-  })
+  # output$pwdfeedback <- renderText("Limited access. Enter password")
+  # observeEvent(input$enterpwd, {
+  #     if(input$pwd == pass){
+  #       tr <<- trall
+  #       output$pwdfeedback <- renderText("Password correct")
+  #     } else{
+  #       tr <<- trall[id %in% c("P37198", "Q7Z3B4", "Q9BVL2")]
+  #       output$pwdfeedback <- renderText("Password incorrect")
+  #     }
+  # })
 })
 
 

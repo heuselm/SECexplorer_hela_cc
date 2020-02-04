@@ -70,9 +70,9 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       width = 3,
-      passwordInput("pwd", "Enter Password", value = "", width = NULL),
-      actionButton("enterpwd", "Enter"),
-      verbatimTextOutput("pwdfeedback"),
+      # passwordInput("pwd", "Enter Password", value = "", width = NULL),
+      # actionButton("enterpwd", "Enter"),
+      # verbatimTextOutput("pwdfeedback"),
       p(),
       selectInput(inputId = "fcolumn",
                   label = "Choose Identifier type for gene/protein selection",
