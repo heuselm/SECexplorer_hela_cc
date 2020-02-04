@@ -147,7 +147,7 @@ shinyServer(function(input, output, session) {
         ## ggtitle(unique(target_id_traces()$Gene_names)) +
         scale_x_continuous(breaks = lx.frc, labels = lx)
     }
-    if(input$error_bars){
+    if(errbars){
       if(input$ertype == "Standard deviation (SD)"){
         p <- p + p +
           geom_ribbon(aes(ymin=intensity_mean-intensity_sd,
@@ -411,7 +411,7 @@ shinyServer(function(input, output, session) {
 
   # Plot the string interactor traces
   output$stringtraces <- renderPlotly({
-      vplot <- viewerPlot(string_id_traces(), split=F)
+      vplot <- viewerPlot(string_id_traces(), split=F, errbars=F)
       ggplotly(vplot)
   })
 
@@ -453,7 +453,7 @@ shinyServer(function(input, output, session) {
 
 
   output$volcanotraces <- renderPlotly({
-    vplot <- viewerPlot(target_id_traces(), split=F)
+    vplot <- viewerPlot(target_id_traces(), split=F, errbars=F)
     ggplotly(vplot)
   })
 
@@ -483,21 +483,6 @@ shinyServer(function(input, output, session) {
         updateSelectizeInput(session, "fvalue", selected = ids)
     })
 
-  
-  #########################
-  ## Password input       #
-  #########################
-
-  # output$pwdfeedback <- renderText("Limited access. Enter password")
-  # observeEvent(input$enterpwd, {
-  #     if(input$pwd == pass){
-  #       tr <<- trall
-  #       output$pwdfeedback <- renderText("Password correct")
-  #     } else{
-  #       tr <<- trall[id %in% c("P37198", "Q7Z3B4", "Q9BVL2")]
-  #       output$pwdfeedback <- renderText("Password incorrect")
-  #     }
-  # })
 })
 
 

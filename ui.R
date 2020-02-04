@@ -64,7 +64,7 @@ shinyUI(fluidPage(
   theme = shinytheme("cosmo"),
 
   # Application title
-  headerPanel("SECexplorer-cc: Browsing HeLaCCL2 complex association states in interphase vs. mitosis", windowTitle = "SECexplorer-cc"),
+  headerPanel("SECexplorer-cc: Browsing dynamic HeLa CCL2 complex association states in interphase vs. mitosis", windowTitle = "SECexplorer-cc"),
 
   # Sidebar with a slider input for number of observations
   sidebarLayout(
@@ -75,14 +75,14 @@ shinyUI(fluidPage(
       # verbatimTextOutput("pwdfeedback"),
       p(),
       selectInput(inputId = "fcolumn",
-                  label = "Choose Identifier type for gene/protein selection",
+                  label = "Choose protein profiles based on:",
                   choices = idcols,
                   selected = "Gene_names"),
 
       uiOutput("fcolumnvalues"), #The possible choices of this field are calculated on the server side and passed over by uiOutput
       p("Delete above entries by backspace and start typing for live search for your target protein(s)"),
 
-      conditionalPanel('input.dataset === "Viewer"',
+      conditionalPanel('input.dataset === "(i) Protein profile viewer"',
 
                        ## selectizeInput("replicate", label = "Select experimental replicate",
                        ##                choices = c(1:3), selected = 1, multiple = FALSE),
@@ -93,7 +93,7 @@ shinyUI(fluidPage(
                        checkboxInput("error_bars", "Plot error area", value = TRUE),
                        uiOutput("errortype")
       ),
-      conditionalPanel('input.dataset === "Search for co-eluting proteins"',
+      conditionalPanel('input.dataset === "(ii) Search for co-eluting proteins"',
                        selectizeInput("trace", label = "Select experimental condition",
                                       choices= c("Mitosis", "Interphase")),
                                       ## choices = paste0(c(rep("mit_r",3), rep("int_r", 3)),c(1,2,3)), selected = 1, multiple = FALSE),
@@ -103,11 +103,11 @@ shinyUI(fluidPage(
                        actionButton("reset", label = "Reset")
                        # plotOutput("plot_st_string")
       ),
-      conditionalPanel('input.dataset === "View differential Association"',
+      conditionalPanel('input.dataset === "(iii) Browse differential association map"',
                        p("To select Proteins of interest click the protein or drag a selection box around multiple proteins")
                        # plotOutput("plot_st_string")
       ),
-      conditionalPanel('input.dataset === "Query String Interactors"',
+      conditionalPanel('input.dataset === "(iv) Query StringDB partners"',
                        uiOutput("stringProt"),
                        uiOutput("nrinteractors"),
                        uiOutput("confidencethr"),
@@ -115,41 +115,36 @@ shinyUI(fluidPage(
                        actionButton("paste", label = "Paste Interactors")
                        # plotOutput("plot_st_string")
       ),
-      conditionalPanel('input.dataset == "Usage instructions"',
-                       helpText("Select a tab to start")
-      ),
       br(),
       br(),
       br(),
-      p("Study authors:"),
+      p("Original study: A global screen for assembly state changes of the mitotic proteome by SEC-SWATH-MS, Cell Systems, 02/2020"),
+      p("Authors:"),
       p("Heusel M, Frank M, Koehler M, Amon S, Frommelt F, Rosenberger G, Bludau I, Aulakh S, Linder MI, Liu Y, Collins BC, Gstaiger M, Kutay U, Aebersold R"),
-      p("Contact: heuselm@imsb.biol.ethz.ch, aebersold@imsb.biol.ethz.ch"),
-      p("Citation: 'A global screen for assembly state changes of the mitotic proteome by SEC-SWATH-MS (unpublished)'")
-
+      p("Contact: moritz.heusel@med.lu.se, aebersold@imsb.biol.ethz.ch")
+      
     ),
 
     # The panel for the plot output
     mainPanel(
       tabsetPanel(
         id = 'dataset',
-        tabPanel('Usage instructions',
-                 p("Welcome to the Hela CCsec Viewer. Please wait a few seconds while the data is loading..."),
-                 h1("Usage Instructions"),
-                 p("This app has 2 main functionalities, acessible over the tabs above:"),
+        tabPanel('Welcome & Instructions',
+                 h1("Welcome to SECexplorer-cc"),
+                 p("SECexplorer-cc offers a dynamic interface for the investigator-driven exploration of a mass spectrometric dataset describing assembly state changes in the mitotic proteome of the HeLa CCL2 cell line, chemically arrested in interphase and prometaphase/Mitosis, followed by fractionation of intact complexes and quantification of component proteins by SEC-SWATH-MS (Heusel et al., 2020). The dataset contains complex patterns of quantitative and qualitative changes in protein assemblies that warrant further, investigator-driven exploration, including the discovery of additional proteins involved in cell cycle regulation or the identification of new components of invariant or state specific assemblies. The SECexplorer-cc interface supports manual review and community-based mining and interpretation of our dataset by four core functionalities: "),
                  tags$ol(
-                   tags$li("Viewer: In order to elucidate the interaction network complex context of proteins identified
-                           in SEC, chromatogram analysis in the context of co-complex 
-                           members is warranted. Therefore, SECexplorer-cc implements multi-protein selection and 
-                           across-condition visualization for expert inspection"),
-                   tags$li("The identified protein traces can be queried for local or global co-elution
-                           in order to find potential interaction parnters.")
+                   tags$ul("(i) Protein profile viewer: Allows interactive viewing of protein SEC fractionation profiles in interphase and mitosis and download of chromatogram graphs to investigate the elution behavior of customized protein sets of interest."),
+                   tags$ul("(ii) Search for co-eluting proteins: Identify putative binding partners of proteins based on local and global elution profile similarity."),
+                   tags$ul("(iii) Browse differential association map: View differential scores for selected proteins or select proteins based on their scores in difference testing. Are there interesting outliers for which no profile change would have been anticipated?"),
+                   tags$ul("(iv) Query StringDB partners: Retrieve interaction or functional partner proteins' elution profiles for contextual interpretation. Do the data support hypotheses on re-arrangements among custom complexes not investigated in the original study?")
                  ),
-                 h2("Viewer"),
-                 img(src='HowtoViewer.png', align = "left", width = "100%"),
+                 h1("Usage instructions:"),
+                 h2("(i) Protein profile viewer"),
+                 img(src='1_Viewer.png', align = "left", width = "100%"),
                  h3("1. Selection of ID type"),
                  tags$ul(
                    tags$li("Entry_name or Gene_Names are most informative and intuitive to search."),
-                   tags$li("Searching for specific protein identifiers is then possible in field 2.")
+                   tags$li("Searching for specific gene/protein identifiers is then possible in field 2.")
                    ),
                  
                  h3("2. Search and selection of multiple proteins"),
@@ -163,23 +158,26 @@ shinyUI(fluidPage(
                  h3("3. Chromatogram view across conditions "),
                  tags$ul(
                    tags$li("By default, a split graph shows the protein level abundance profiles over the 
-                            chromatographic fractions"),
-                   tags$li("The chromatograms are displayed for one of the experimental replicates at a time"),
+                            chromatographic fractions in either condition, interphase and mitosis."),
+                   tags$li("The chromatograms are displayed as mean of the three replicates, with shaded areas indicating the standard error of the mean (SEM)"),
                    tags$li("Options for chromatogram display can be selected in (4)")
                  ),
                  h3("4. Options for chromatogram display"),
                  tags$ul(
-                   tags$li("Selection of experimental replicate"),
-                   tags$li("LOG10-transformation of the intensity axis to spot low-abundant protein pools"),
-                   tags$li("Selection whether monomer expected fraction markers shall be displayed")
+                   tags$li("Selection whether the plot should be split by condition, or if conditions shall be encoded as line type."),
+                   tags$li("Option for LOG10-transformation of the intensity axis to spot low-abundant protein pools"),
+                   tags$li("Selection whether monomer expected fraction markers shall be displayed"),
+                   tags$li("Option whether (and which type of) error areas shall be indicated. Works best on split plot.")
                    ),
+                 h3("Note that the plots are interactive (thanks, plotly!)"),
+                 p(),
                  
-                 h3("5. Annotation table for the selected proteins "),
-                 tags$ul(
-                   tags$li("To help cross-referencing and establishing links which other proteins may be 
-                            interesting to display in reference.")
-                 ),
-                 h2("Search"),
+                 # h3("5. Annotation table for the selected proteins "),
+                 # tags$ul(
+                 #   tags$li("To help cross-referencing and establishing links which other proteins may be 
+                 #            interesting to display in reference.")
+                 # ),
+                 h2("(ii) Search for co-eluting proteins"),
                  img(src='HowtoSearchInput.png', align = "left", width = "100%"),
                  h3("1. Experimental condition"),
                  tags$ul(tags$li("Choose the experimental condition where the search will be performed")),
@@ -192,7 +190,7 @@ shinyUI(fluidPage(
                    ),
                  h3("4. Perform the search"),
                  p(),
-                 h2("Search Results"),
+                 h2("(ii) Search for co-eluting proteins: Search Results"),
                  img(src='HowtoSearchResult.png', align = "left", width = "100%"),
                  h3("1. Correlation cutoff"),
                  tags$ul(
@@ -203,15 +201,33 @@ shinyUI(fluidPage(
                  h3("2. Result table"),
                  tags$ul(tags$li("A table of all proteins meeting the search criteria")),
                  h3("3. Reset"),
-                 tags$ul(tags$li("Return to the search input window"))
+                 tags$ul(tags$li("Return to the search input window")),
+                 p(),
+                 h2("(iii) Browse differential association map"),
+                 img(src='3_BrowseScoreMap.png', align = "left", width = "100%"),
+                 h3("1. Select proteins based on scores"),
+                 tags$ul(
+                   tags$li("Each point represents one protein feature's differential scores between the conditions. Click the point or draw a box around the scores to select a set of proteins."),
+                   tags$li("Proteins are added to those already selected via the viewer. Visit this page to see the differential scores of a selected protein set of interest.")),
+                 h3("2. Conditional SEC profiles of the selected proteins. For more visualization options, visit the viewer tab (i)"),
+                 p(),
+                 h2("(iv) Query StringDB partners"),
+                 img(src='4_QueryStringPartners.png', align = "left", width = "100%"),
+                 h3("1. Selected proteins"),
+                 h3("2. Select one protein as basis for the query to StringDB"),
+                 h3("3. Select parameters for the query to StringDB"),
+                 h3("4. Add the retrieved partner proteins to the current analysis"),
+                 h3("5. StringDB network view of the current query"),
+                 h3("6. Preview of the SEC-SWATH-MS chromatograms of the proteins of the current query (MS-detectable subset)")
+                 
         ),
-        tabPanel('Viewer',       
+        tabPanel('(i) Protein profile viewer',       
                  plotlyOutput("plot", height = 600),
                  p(),
                  dataTableOutput("table"),
                  downloadButton("downloadPlot", "Download as PDF")
         ),
-        tabPanel('Search for co-eluting proteins',
+        tabPanel('(ii) Search for co-eluting proteins',
                  uiOutput("plots"),
                  fluidRow(
                    column(3, uiOutput("sliderglob")),
@@ -220,7 +236,7 @@ shinyUI(fluidPage(
                  dataTableOutput("restable"),
                  p(class = 'text-center', uiOutput("downloadSemiTargetedRes"))
         ),
-        tabPanel('View differential Association',
+        tabPanel('(iii) Browse differential association map',
                  ## p("Volcano plot indicating differentially behaving Proteins acrosss the cell cycle"),
                  plotlyOutput("plot_diffexpr", height = 400),
                  ## verbatimTextOutput("click"),
@@ -228,7 +244,7 @@ shinyUI(fluidPage(
                  # verbatimTextOutput("hover"),
                  # verbatimTextOutput("diffexprsel")
         ),
-        tabPanel('Query String Interactors',
+        tabPanel('(iv) Query StringDB partners',
                  p("String interaction partners"),
                  fluidRow(
                    column(12, align="center",
