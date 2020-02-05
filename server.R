@@ -153,7 +153,7 @@ shinyServer(function(input, output, session) {
     }
     if(errbars){
       if(input$ertype == "Standard deviation (SD)"){
-        p <- p + p +
+        p <- p +
           geom_ribbon(aes(ymin=intensity_mean-intensity_sd,
                           ymax = intensity_mean+intensity_sd,
                           fill = Gene_names),
