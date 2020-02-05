@@ -44,12 +44,20 @@ if (!require("plotly")){
 if (!require("data.table")){
   install.packages("data.table")
 }
+if (!require("DT")){
+  install.packages("DT")
+}
+if (!require("shinythemes")){
+  install.packages("shinythemes")
+}
 
 # load packages
 library(shiny)
+library(shinythemes)
 library(ggplot2)
 library(plotly)
 library(data.table)
+library(DT)
 
 
 ## prepare data
@@ -224,7 +232,7 @@ shinyUI(fluidPage(
         tabPanel('(i) Protein profile viewer',       
                  plotlyOutput("plot", height = 600),
                  p(),
-                 dataTableOutput("table"),
+                 DT::dataTableOutput("table"),
                  downloadButton("downloadPlot", "Download as PDF")
         ),
         tabPanel('(ii) Search for co-eluting proteins',
@@ -233,7 +241,7 @@ shinyUI(fluidPage(
                    column(3, uiOutput("sliderglob")),
                    column(3, uiOutput("sliderloc"))
                  ),
-                 dataTableOutput("restable"),
+                 DT::dataTableOutput("restable"),
                  p(class = 'text-center', uiOutput("downloadSemiTargetedRes"))
         ),
         tabPanel('(iii) Browse differential association map',
@@ -252,7 +260,7 @@ shinyUI(fluidPage(
                    )
                  ),
                  plotlyOutput("stringtraces", height=400),
-                 dataTableOutput("stringtable")
+                 DT::dataTableOutput("stringtable")
         )
       )
     )

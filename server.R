@@ -46,12 +46,16 @@ if (!require("plotly")){
 if (!require("data.table")){
   install.packages("data.table")
 }
+if (!require("DT")){
+  install.packages("DT")
+}
 
 # load packages
 library(shiny)
 library(ggplot2)
 library(plotly)
 library(data.table)
+library(DT)
 library(STRINGdb)
 
 # Source custom functions
@@ -320,13 +324,13 @@ shinyServer(function(input, output, session) {
         }
       })
     ## Table output
-    output$table <- renderDataTable({
+    output$table <- DT::renderDataTable({
       target_id <- up[which(up[[input$fcolumn]] %in% input$fvalue),
                                       unique(Entry)]
       up[Entry %in% target_id]
     })
-    output$restable <- renderDataTable({
-      searchResFilt()
+    output$restable <- DT::renderDataTable({
+      as.data.frame(searchResFilt())
     })
   })
 
@@ -339,7 +343,7 @@ shinyServer(function(input, output, session) {
           searchResFilt(searchResFilt()[global_cor >= input$globalCorr])
       }
       paste_ids <- up[Entry %in% searchResFilt()$id][[input$fcolumn]]
-      ids <- unique(c(input$fvalue, paste_ids))
+      
       print(ids)
 
       updateSelectizeInput(session, "fvalue", selected = ids)
@@ -416,7 +420,7 @@ shinyServer(function(input, output, session) {
   })
 
   # String table output
-  output$stringtable <- renderDataTable({
+  output$stringtable <- DT::renderDataTable({
     string_table()
   })
 
